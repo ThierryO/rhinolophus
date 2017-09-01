@@ -10,13 +10,13 @@ reconstruct.pulse <- function(pulse.fft, local.time = TRUE, plot.it = TRUE, asp 
   max.dim <- pmin(dim(pulse.fft$fft), pulse.fft$fft.dim)
   fft.coefs[seq_len(max.dim[1]), seq_len(max.dim[2])] <- pulse.fft$fft[seq_len(max.dim[1]), seq_len(max.dim[2])]
   amplitude <- abs(fft(fft.coefs, inverse = TRUE) / prod(pulse.fft$fft.dim))
-  extra.time <- ifelse(local.time, 0, pulse.fft$parameters["start.time"])
+  extra.time <- ifelse(local.time, 0, pulse.fft$parameters["StartTime"])
   puls.raster <- raster(
     amplitude[rev(seq_len(pulse.fft$fft.dim[1])), ],
     xmn = extra.time,
-    xmx = extra.time + pulse.fft$parameters["puls.duration"],
-    ymn = pulse.fft$parameters["frequency.min"],
-    ymx = pulse.fft$parameters["frequency.max"]
+    xmx = extra.time + pulse.fft$parameters["PulsDuration"],
+    ymn = pulse.fft$parameters["FrequencyMin"],
+    ymx = pulse.fft$parameters["FrequencyMax"]
   )
   if(plot.it){
     plot(puls.raster, xlab = 'Time (ms)', ylab = "Frequency (kHz)", asp = asp)

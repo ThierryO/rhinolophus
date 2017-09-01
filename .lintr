@@ -1,0 +1,2 @@
+lintrs: with_defaults()
+exclude: "[readWave|rowColFromCell|Which|gContains|gWithin]\\("

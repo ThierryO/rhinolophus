@@ -1,7 +1,7 @@
 #' Train a Kohonen network
 #' @export
 #' @import kohonen
-#' @importFrom class somgrid
+#' @importFrom kohonen somgrid
 #' @param pattern A matrix with patterns
 #' @param truth A data.frame with the truth
 trainrda <- function(pattern, truth){
