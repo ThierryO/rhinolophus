@@ -2,7 +2,7 @@ Package: rhinolophus
 Type: Package
 Title: Identify Bats from Ultrasound Recordings
 Version: 0.1
-Date: 2015-08-09
+Date: 2017-09-01
 Author: Thierry Onkelinx
 Maintainer: Thierry Onkelinx <rhinolophus@muscardinus.be>
 Description: Extract bat sounds from wav files, calculate metrics on those
