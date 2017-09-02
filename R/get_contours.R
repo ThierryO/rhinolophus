@@ -1,0 +1,46 @@
+#' get contours as SpatialPolygons
+#' @importFrom raster rasterToContour
+#' @importFrom sp coordinates Polygon Polygons SpatialPolygonsDataFrame
+#' @export
+#' @param x a raster
+#' @param levels a vector with the required levels
+get_contours <- function(x, levels){
+  contour_line <- rasterToContour(x, levels = levels)
+  contour_closed <- lapply(
+    coordinates(contour_line),
+    function(x){
+      sapply(
+        x,
+        function(y){
+          identical(y[1, ], y[nrow(y), ])
+        }
+      )
+    }
+  )
+  contour_line$level <- as.numeric(levels(contour_line$level))[
+    contour_line$level
+  ]
+  lapply(
+    seq_along(contour_line),
+    function(i)
+      {
+        closed_lines <- coordinates(contour_line)[[i]][contour_closed[[i]]]
+        if (length(closed_lines) == 0) {
+          NULL
+        } else {
+          polygons <- lapply(seq_along(closed_lines), function(j){
+            polygon <- Polygon(closed_lines[[j]])
+            Polygons(list(polygon), ID = j + i * 1e6)
+          })
+          polygons <- SpatialPolygons(polygons)
+          dataset <- data.frame(
+            ID = as.character(seq_along(closed_lines) + i * 1e6),
+            level = contour_line$level[i]
+          )
+          rownames(dataset) <- seq_along(closed_lines) + i * 1e6
+          SpatialPolygonsDataFrame(Sr = polygons, data = dataset)
+        }
+    }
+  ) %>%
+    do.call(what = rbind)
+}
