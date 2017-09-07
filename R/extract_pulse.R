@@ -25,6 +25,7 @@ extract_pulse <- function(spectrogram, min.peak = 30, contour.step = 10){
   contours <- vector("list", cellStats(candidate, sum))
   candidate[candidate == 0] <- NA
   candidate <- candidate * spectrogram_raster
+  current_max <- maxValue(candidate)
   while (!is.na(maxValue(candidate)) && maxValue(candidate) >= min.peak) {
     # get location of the strongest remaining peak
     peak_location <- xyFromCell(spectrogram_raster, which.max(candidate)) %>%
@@ -39,10 +40,11 @@ extract_pulse <- function(spectrogram, min.peak = 30, contour.step = 10){
       ymin(spectrogram_raster),
       ymax(spectrogram_raster)
     ) %>%
-      crop(x = spectrogram_raster)
+      crop(x = spectrogram_raster) %>%
+      "-"(current_max)
     # calculate the contours
     current_contours <- seq(
-      maxValue(candidate),
+      0,
       by = -contour.step,
       length = 4
     ) %>%
@@ -55,6 +57,7 @@ extract_pulse <- function(spectrogram, min.peak = 30, contour.step = 10){
       current_contours <- current_contours[relevant, ]
       current_contours$X <- peak_location$x
       current_contours$Y <- peak_location$y
+      current_contours$PeakAmplitude <- current_max
       # store contours
       contours[[which.max(sapply(contours, is.null))]] <- current_contours
       # ignore candidates within current contour
@@ -62,6 +65,7 @@ extract_pulse <- function(spectrogram, min.peak = 30, contour.step = 10){
     } else {
       candidate[candidate == maxValue(candidate)] <- NA
     }
+    current_max <- maxValue(candidate)
   }
   contours <- contours[!sapply(contours, is.null)] %>%
     do.call(what = rbind)
