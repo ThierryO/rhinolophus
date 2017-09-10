@@ -44,11 +44,10 @@ extract_pulse <- function(spectrogram, min.peak = 30, contour.step = 10){
       "-"(current_max)
     # calculate the contours
     current_contours <- seq(
-      0,
+      -contour.step,
       by = -contour.step,
-      length = 4
+      length = 3
     ) %>%
-      tail(-1) %>%
       get_contours(x = peak)
     # select only the contours which contain the peak
     coordinates(peak_location) <- ~x + y
