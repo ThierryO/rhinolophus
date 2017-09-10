@@ -20,7 +20,7 @@ get_contours <- function(x, levels){
   contour_line$level <- as.numeric(levels(contour_line$level))[
     contour_line$level
   ]
-  lapply(
+  contours <- lapply(
     seq_along(contour_line),
     function(i)
       {
@@ -41,6 +41,7 @@ get_contours <- function(x, levels){
           SpatialPolygonsDataFrame(Sr = polygons, data = dataset)
         }
     }
-  ) %>%
+  )
+  contours[!sapply(contours, is.null)] %>%
     do.call(what = rbind)
 }
