@@ -6,16 +6,21 @@ fourier_ellipse <- function(fourier_param) {
   theta <- seq(0, by = 2 * pi / 5, length.out = 5)
   pq <- cbind(sin(theta), cos(theta)) %*% fourier_param
 
-  pq <- pq + rnorm(length(pq), sd = .Machine$double.eps)
-  D1 <- cbind(pq[, 1] ^ 2, pq[, 1] * pq[, 2], pq[, 2] ^ 2)
-  D2 <- cbind(pq, 1)
-  S1 <- crossprod(D1)
-  S2 <- crossprod(D1, D2)
-  S3 <- crossprod(D2)
-  T <- -tcrossprod(solve(S3), S2)
-  M <- S1 + S2 %*% T
-  M <- rbind(M[3,] / 2, -M[2,], M[1,] / 2)
-  evec <- eigen(M)$vec
+  repeat {
+    pq <- pq + rnorm(length(pq), sd = .Machine$double.eps)
+    D1 <- cbind(pq[, 1] ^ 2, pq[, 1] * pq[, 2], pq[, 2] ^ 2)
+    D2 <- cbind(pq, 1)
+    S1 <- crossprod(D1)
+    S2 <- crossprod(D1, D2)
+    S3 <- crossprod(D2)
+    T <- -tcrossprod(solve(S3), S2)
+    M <- S1 + S2 %*% T
+    M <- rbind(M[3,] / 2, -M[2,], M[1,] / 2)
+    evec <- eigen(M)$vec
+    if (!is.complex(evec)) {
+      break
+    }
+  }
   cond <- 4 * evec[1,] * evec[3,] - evec[2,]^2
   a1 <- evec[, which(cond > 0)]
   f <- c(a1, T %*% a1)
