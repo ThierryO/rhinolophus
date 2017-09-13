@@ -29,11 +29,11 @@ read_wav <- function(
   } else {
     selected.channel <- raw.data@right
   }
-  return(
-    list(
-      sample.rate = header$sample.rate * te.factor,
-      sample = as.integer(header$samples),
-      values = selected.channel
-    )
+  bat_wav(
+    filename = filename,
+    channel = channel,
+    te.factor = te.factor,
+    sample.rate = header$sample.rate * te.factor,
+    values = selected.channel
   )
 }
