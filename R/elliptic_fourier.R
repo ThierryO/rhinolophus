@@ -6,7 +6,7 @@
 #' @importFrom stats lm formula coef
 #' @importFrom tidyr gather_
 elliptic_fourier <- function(x, f_max = 30){
-  f <- pmin(nrow(x), f_max)
+  f <- pmin(nrow(x) %/% 2 - 1, f_max)
   form <- seq_len(f) %>%
     sprintf(fmt = "I(sinpi(%1$i * row_id)) + I(cospi(%1$i * row_id))") %>%
     paste(collapse = "+")
@@ -15,21 +15,25 @@ elliptic_fourier <- function(x, f_max = 30){
   coefs <- cbind(
     X = coef(lm_x),
     Y = coef(lm_y)
+  )
+
+  params <- lapply(
+    seq_len(f),
+    function(i){
+      data.frame(
+        Harmonic = i,
+        Type = c("major", "minor", "rotation"),
+        Value = fourier_ellipse(fourier_param = coefs[(i - 1) * 2 + 2:3, ]),
+        stringsAsFactors = FALSE
+      )
+    }
   ) %>%
-    rbind(matrix(0, nrow = 2 * (f_max - f), ncol = 2))
-  cos <- coefs[seq(3, by = 2, length.out = f_max), ]
-  sin <- coefs[seq(2, by = 2, length.out = f_max), ]
-  amplitude <- sqrt(cos ^ 2 + sin ^ 2)
-  phase <- atan2(cos, sin)
-  rbind(
-    coefs[1, ],
-    unname(amplitude),
-    unname(phase)
+    do.call(what = rbind)
+  data.frame(
+    Harmonic = 0,
+    Type = c("x", "y"),
+    Value = c(coef(lm_x)[1], coef(lm_y)[1]),
+    stringsAsFactors = FALSE
   ) %>%
-    as.data.frame() %>%
-    mutate_(
-      CycleFrequency = ~c(0, seq_len(f_max), seq_len(f_max)),
-      Type = ~c(rep("Amplitude", f_max + 1), rep("Phase", f_max))
-    ) %>%
-    gather_("Axis", "Estimate", c("X", "Y"))
+    bind_rows(params)
 }
