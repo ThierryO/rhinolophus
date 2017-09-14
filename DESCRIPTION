@@ -29,6 +29,9 @@ Suggests:
 RoxygenNote: 6.0.1
 Collate: 
     'batRecording-class.R'
+    'batMeta-class.R'
+    'import_S3_classes.R'
+    'batSpectrogram-class.R'
     'batWav-class.R'
     'bat_wav.R'
     'contour2pulse.R'

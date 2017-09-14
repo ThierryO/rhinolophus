@@ -4,12 +4,14 @@
 \alias{wav2spectrogram}
 \title{Convert the output of read_wav to a spectrogram}
 \usage{
-wav2spectrogram(wav, window.ms = 1)
+wav2spectrogram(wav, window.ms = 1, overlap = 0.9)
 }
 \arguments{
 \item{wav}{An object as created by \code{\link{read_wav}}}
 
 \item{window.ms}{The size of the window in microseconds. Default to 1.}
+
+\item{overlap}{The overlap of two windows. Defaults to 0.9.}
 }
 \description{
 Convert the output of read_wav to a spectrogram
