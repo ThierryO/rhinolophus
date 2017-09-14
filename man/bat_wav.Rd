@@ -4,11 +4,13 @@
 \alias{bat_wav}
 \title{create a batWav object}
 \usage{
-bat_wav(filename, channel = c("left", "right"), te.factor = 1, sample.rate,
-  values)
+bat_wav(filename, timestamp, channel = c("left", "right"), te.factor = 1,
+  sample.rate, values)
 }
 \arguments{
 \item{filename}{The name of the file}
+
+\item{timestamp}{the timestamp of the file}
 
 \item{channel}{Select the left or the right channel}
 

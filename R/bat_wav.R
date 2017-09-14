@@ -1,5 +1,6 @@
 #' create a batWav object
 #' @inheritParams read_wav
+#' @param timestamp the timestamp of the file
 #' @param sample.rate the realtime sample rate
 #' @param values the recorded values
 #' @export
@@ -7,6 +8,7 @@
 #' @importFrom methods new
 bat_wav <- function(
   filename,
+  timestamp,
   channel = c("left", "right"),
   te.factor = 1,
   sample.rate,
@@ -20,13 +22,19 @@ bat_wav <- function(
       Values = values
     )
   )
+  recording <- data.frame(
+    ID = 1,
+    Fingerprint = fingerprint,
+    Filename = filename,
+    Timestamp = timestamp,
+    SampleRate = sample.rate,
+    TEFactor = te.factor,
+    LeftChannel = channel == "left",
+    stringsAsFactors = FALSE
+  )
   new(
     "batWav",
-    Filename = filename,
-    LeftChannel = channel == "left",
-    TEFactor = te.factor,
-    SampleRate = sample.rate,
-    Values = values,
-    Fingerprint = fingerprint
+    Recording = recording,
+    Values = values
   )
 }

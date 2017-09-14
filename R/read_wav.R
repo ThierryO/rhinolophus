@@ -22,6 +22,7 @@ read_wav <- function(
     stop(filename, " does not exist")
   }
 
+
   header <- readWave(filename, header = TRUE)
   raw.data <- readWave(filename)
   if (channel == "left") {
@@ -31,6 +32,7 @@ read_wav <- function(
   }
   bat_wav(
     filename = filename,
+    timestamp = file.info(filename)$mtime,
     channel = channel,
     te.factor = te.factor,
     sample.rate = header$sample.rate * te.factor,

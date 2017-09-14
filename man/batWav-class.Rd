@@ -10,10 +10,8 @@ Holds the relevant content of wav files
 \section{Slots}{
 
   \describe{
-   \item{\code{SampleRate}}{The realtime sample rate (i.e. recording sample rate x time expantion factor)}
-   \item{\code{TEFactor}}{Time expantion factor}
-   \item{\code{Value}}{The actual recorded values}
-   \item{\code{Fingerprint}}{The fingerprint of the object}
+   \item{\code{Recording}}{The metadata on the recording}
+   \item{\code{Values}}{The actual recorded values}
   }
 }
 
