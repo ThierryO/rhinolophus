@@ -30,6 +30,9 @@ read_wav <- function(
   } else {
     selected.channel <- raw.data@right
   }
+  if (length(selected.channel) == 0) {
+    stop("No data in selected channel")
+  }
   bat_wav(
     filename = filename,
     timestamp = file.info(filename)$mtime,

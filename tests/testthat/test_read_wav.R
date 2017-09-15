@@ -8,17 +8,14 @@ expect_is(
   leislers <- read_wav(
     filename = system.file("demo_wav/leislers.wav", package = "rhinolophus")
   ),
-  "list"
+  "batWav"
 )
-expect_identical(leislers$sample.rate, 441000)
-expect_identical(leislers$sample, 5065L)
-expect_identical(leislers$sample, length(leislers$values))
+expect_identical(leislers@Recording$SampleRate, 441000)
 
-expect_is(
-  leislers.right <- read_wav(
+expect_error(
+  read_wav(
     filename = system.file("demo_wav/leislers.wav", package = "rhinolophus"),
     channel = "right"
   ),
-  "list"
+  "No data in selected channel"
 )
-expect_identical(length(leislers.right$values), 0L)
