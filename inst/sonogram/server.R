@@ -63,16 +63,16 @@ shinyServer(function(input, output, session) {
       te.factor = as.integer(gsub("^.*, TE = ", "", input$channel))
     ) %>%
       wav2spectrogram()
-    sonogram$f <- sonogram$f / 1000
-    sonogram$t <- sonogram$t * 1000
+    sonogram@SpecGram$f <- sonogram@SpecGram$f / 1000
+    sonogram@SpecGram$t <- sonogram@SpecGram$t * 1000
     updateSliderInput(
       session,
       "starttime",
       value = 0,
-      max = input$timeinterval * (max(sonogram$t) %/% input$timeinterval),
+      max = input$timeinterval * (max(sonogram@SpecGram$t) %/% input$timeinterval),
       step = input$timeinterval
     )
-    amplitude_range <- pretty(range(sonogram$S), 10)
+    amplitude_range <- pretty(range(sonogram@SpecGram$S), 10)
     updateSliderInput(
       session,
       "amplitude",
@@ -80,7 +80,7 @@ shinyServer(function(input, output, session) {
       min = min(amplitude_range),
       max = max(amplitude_range)
     )
-    frequency_range <- pretty(range(sonogram$f), 10)
+    frequency_range <- pretty(range(sonogram@SpecGram$f), 10)
     updateSliderInput(
       session,
       "frequency",
@@ -89,11 +89,11 @@ shinyServer(function(input, output, session) {
       max = max(frequency_range)
     )
     raster(
-      sonogram$S[rev(seq_along(sonogram$f)), ],
-      xmn = min(sonogram$t),
-      xmx = max(sonogram$t),
-      ymn = min(sonogram$f),
-      ymx = max(sonogram$f)
+      sonogram@SpecGram$S[rev(seq_along(sonogram@SpecGram$f)), ],
+      xmn = min(sonogram@SpecGram$t),
+      xmx = max(sonogram@SpecGram$t),
+      ymn = min(sonogram@SpecGram$f),
+      ymx = max(sonogram@SpecGram$f)
     )
   })
 
