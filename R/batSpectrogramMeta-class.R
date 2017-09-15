@@ -1,4 +1,4 @@
-#' The batMeta class
+#' The batSpectrogramMeta class
 #'
 #' It holds metadata on bat recordings
 #' @section Slots:
@@ -6,15 +6,15 @@
 #'    \item{\code{Recording}}{A data.frame with ID, Fingerprint, Filename, Timestamp, SampleRate, SampleRate, TEFactor, LeftChannel}
 #'    \item{\code{Spectrogram}}{A data.frame with ID, Fingerprint, WindowMS, WindowN, Overlap, Recording}
 #'   }
-#' @name batMeta-class
-#' @rdname batMeta-class
-#' @exportClass batMeta
-#' @aliases batMeta-class
+#' @name batSpectrogramMeta-class
+#' @rdname batSpectrogramMeta-class
+#' @exportClass batSpectrogramMeta
+#' @aliases batSpectrogramMeta-class
 #' @importFrom methods setClass
 #' @docType class
 #' @include batWavMeta-class.R
 setClass(
-  "batMeta",
+  "batSpectrogramMeta",
   representation = representation(
     Spectrogram = "data.frame"
   ),
@@ -24,7 +24,7 @@ setClass(
 #' @importFrom methods setValidity
 #' @importFrom assertthat assert_that has_name
 setValidity(
-  "batMeta",
+  "batSpectrogramMeta",
   function(object){
     assert_that(has_name(object@Spectrogram, "ID"))
     assert_that(has_name(object@Spectrogram, "Fingerprint"))

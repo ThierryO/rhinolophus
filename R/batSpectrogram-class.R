@@ -12,14 +12,14 @@
 #' @aliases batSpectrogram-class
 #' @importFrom methods setClass
 #' @docType class
-#' @include batMeta-class.R
+#' @include batSpectrogramMeta-class.R
 #' @include import_S3_classes.R
 setClass(
   "batSpectrogram",
   representation = representation(
     SpecGram = "specgram"
   ),
-  contains = "batMeta"
+  contains = "batSpectrogramMeta"
 )
 
 #' @importFrom methods setValidity
