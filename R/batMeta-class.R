@@ -12,13 +12,13 @@
 #' @aliases batMeta-class
 #' @importFrom methods setClass
 #' @docType class
-#' @include batRecording-class.R
+#' @include batWavMeta-class.R
 setClass(
   "batMeta",
   representation = representation(
     Spectrogram = "data.frame"
   ),
-  contains = "batRecording"
+  contains = "batWavMeta"
 )
 
 #' @importFrom methods setValidity

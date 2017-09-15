@@ -12,13 +12,13 @@
 #' @aliases batWav-class
 #' @importFrom methods setClass
 #' @docType class
-#' @include batRecording-class.R
+#' @include batWavMeta-class.R
 setClass(
   "batWav",
   representation = representation(
     Values = "integer"
   ),
-  contains = "batRecording"
+  contains = "batWavMeta"
 )
 
 #' @importFrom methods setValidity

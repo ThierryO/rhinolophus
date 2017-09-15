@@ -1,18 +1,18 @@
-#' The batRecording class
+#' The batWavMeta class
 #'
 #' It holds metadata on bat recordings
 #' @section Slots:
 #'   \describe{
 #'    \item{\code{Recording}}{A data.frame with ID, Fingerprint, Filename, Timestamp, SampleRate, SampleRate, TEFactor, LeftChannel}
 #'   }
-#' @name batRecording-class
-#' @rdname batRecording-class
-#' @exportClass batRecording
-#' @aliases batRecording-class
+#' @name batWavMeta-class
+#' @rdname batWavMeta-class
+#' @exportClass batWavMeta
+#' @aliases batWavMeta-class
 #' @importFrom methods setClass
 #' @docType class
 setClass(
-  "batRecording",
+  "batWavMeta",
   representation = representation(
     Recording = "data.frame"
   )
@@ -21,7 +21,7 @@ setClass(
 #' @importFrom methods setValidity
 #' @importFrom assertthat assert_that has_name
 setValidity(
-  "batRecording",
+  "batWavMeta",
   function(object){
     assert_that(has_name(object@Recording, "ID"))
     assert_that(has_name(object@Recording, "Fingerprint"))

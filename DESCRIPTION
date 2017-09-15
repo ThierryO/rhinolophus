@@ -28,7 +28,7 @@ Suggests:
     igraph
 RoxygenNote: 6.0.1
 Collate: 
-    'batRecording-class.R'
+    'batWavMeta-class.R'
     'batMeta-class.R'
     'import_S3_classes.R'
     'batSpectrogram-class.R'
