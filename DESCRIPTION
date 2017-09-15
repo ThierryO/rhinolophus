@@ -31,6 +31,7 @@ Collate:
     'batWavMeta-class.R'
     'batSpectrogramMeta-class.R'
     'batPulseMeta-class.R'
+    'batPulse-class.R'
     'import_S3_classes.R'
     'batSpectrogram-class.R'
     'batWav-class.R'
