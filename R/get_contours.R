@@ -35,7 +35,7 @@ get_contours <- function(x, levels){
           polygons <- SpatialPolygons(polygons)
           dataset <- data.frame(
             ID = as.character(seq_along(closed_lines) + i * 1e6),
-            level = contour_line$level[i]
+            ContourAmplitude = contour_line$level[i]
           )
           rownames(dataset) <- seq_along(closed_lines) + i * 1e6
           SpatialPolygonsDataFrame(Sr = polygons, data = dataset)

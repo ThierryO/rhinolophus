@@ -4,7 +4,8 @@
 \alias{extract_pulse}
 \title{Extract pulses from a spectrogram}
 \usage{
-extract_pulse(spectrogram, min.peak = 30, contour.step = 10)
+extract_pulse(spectrogram, min.peak = 30, contour.step = 10,
+  contour.n = 3)
 }
 \arguments{
 \item{spectrogram}{a spectrogram}
@@ -12,6 +13,8 @@ extract_pulse(spectrogram, min.peak = 30, contour.step = 10)
 \item{min.peak}{minimum amplitude of the peak. Defaults to 30 dB.}
 
 \item{contour.step}{step size of the contour. Defaults to 10 dB.}
+
+\item{contour.n}{the maximum number of contours per pulse. Defaults to 3.}
 }
 \description{
 Extract pulses from a spectrogram

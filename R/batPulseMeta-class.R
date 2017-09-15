@@ -29,6 +29,7 @@ setValidity(
   function(object){
     assert_that(has_name(object@Pulse, "ID"))
     assert_that(has_name(object@Pulse, "Fingerprint"))
+    assert_that(has_name(object@Pulse, "Spectrogram"))
     assert_that(has_name(object@Pulse, "PeakX"))
     assert_that(has_name(object@Pulse, "PeakY"))
     assert_that(has_name(object@Pulse, "PeakAmplitude"))
