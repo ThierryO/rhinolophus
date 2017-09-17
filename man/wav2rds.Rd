@@ -5,7 +5,8 @@
 \title{Extract pulses and store them in an rds file}
 \usage{
 wav2rds(path, te.factor = 1, channel = c("left", "right"), window.ms = 1,
-  overlap = 0.9, min.peak = 30, contour.step = 10, contour.n = 3)
+  overlap = 0.9, min.peak = 30, contour.step = 10, contour.n = 3,
+  overwrite = FALSE)
 }
 \arguments{
 \item{path}{the path of the files}
@@ -24,6 +25,8 @@ to recording}
 \item{contour.step}{step size of the contour. Defaults to 10 dB.}
 
 \item{contour.n}{the maximum number of contours per pulse. Defaults to 3.}
+
+\item{overwrite}{overwrite existing rds files?. Default to FALSE}
 }
 \description{
 Extract pulses and store them in an rds file
