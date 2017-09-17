@@ -13,13 +13,13 @@
 #' @importFrom methods setClass
 #' @importClassesFrom sp SpatialPolygonsDataFrame
 #' @docType class
-#' @include batPulseMeta-class.R
+#' @include batContourMeta-class.R
 setClass(
   "batPulse",
   representation = representation(
-    Contour = "SpatialPolygonsDataFrame"
+    Plot = "SpatialPolygonsDataFrame"
   ),
-  contains = "batPulseMeta"
+  contains = "batContourMeta"
 )
 
 #' @importFrom methods setValidity

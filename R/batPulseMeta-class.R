@@ -5,7 +5,7 @@
 #'   \describe{
 #'    \item{\code{Recording}}{A data.frame with ID, Fingerprint, Filename, Timestamp, SampleRate, SampleRate, TEFactor, LeftChannel}
 #'    \item{\code{Spectrogram}}{A data.frame with ID, Fingerprint, WindowMS, WindowN, Overlap, Recording}
-#'    \item{\code{Pulse}}{A data.frame with ID, Fingerprint, WindowMS, WindowN, Overlap, Recording}
+#'    \item{\code{Pulse}}{A data.frame with ID, Fingerprint, Spectrogram, PeakX, PeakY, PeakAmplitude}
 #'   }
 #' @name batPulseMeta-class
 #' @rdname batPulseMeta-class
@@ -33,9 +33,6 @@ setValidity(
     assert_that(has_name(object@Pulse, "PeakX"))
     assert_that(has_name(object@Pulse, "PeakY"))
     assert_that(has_name(object@Pulse, "PeakAmplitude"))
-    assert_that(has_name(object@Pulse, "ContourAmplitude"))
-    assert_that(has_name(object@Pulse, "ContourStep"))
-    assert_that(has_name(object@Pulse, "ContourMax"))
 
     return(TRUE)
   }
