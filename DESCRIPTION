@@ -13,6 +13,7 @@ Imports:
     signal,
     rgeos,
     assertthat,
+    tidyr,
     dplyr,
     digest,
     methods,
@@ -33,6 +34,7 @@ Collate:
     'batPulseMeta-class.R'
     'batContourMeta-class.R'
     'batPulse-class.R'
+    'batPulseParameter-class.R'
     'import_S3_classes.R'
     'batSpectrogram-class.R'
     'batWav-class.R'

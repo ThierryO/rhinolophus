@@ -1,40 +1,56 @@
 #' Convert pulses into parameters
 #' @param pulses a SpatialPolygonsDataFrame with pulses
 #' @export
-#' @importFrom dplyr %>% mutate_ group_by_ slice_ filter_ summarise_ filter_ inner_join do_ n
+#' @importFrom dplyr %>% mutate_ group_by_ slice_ filter_ summarise_ filter_ inner_join do_ n bind_rows
 #' @importFrom sp coordinates
 #' @importFrom tidyr unnest_
 pulse_parameter <- function(pulses) {
-  pulse <- pulses@data
-  pulse$xy <- lapply(
-    pulses@polygons,
-    function(x){
-      x@Polygons[[1]] %>%
+  pulse <- lapply(
+    seq_along(pulses@Plot),
+    function(i){
+      pulses@Plot@polygons[[i]]@Polygons[[1]] %>%
         coordinates() %>%
-        data.frame()
+        data.frame() %>%
+        mutate_(ID = ~pulses@Plot$ID[i])
     }
-  )
-  pulse <- unnest_(pulse, ~xy) %>%
-    mutate_(
-      X1 = ~X1 - X,
-      X2 = ~X2 - Y
+  ) %>%
+    bind_rows() %>%
+    inner_join(
+      pulses@Contour %>%
+        select_(~ID, ~Fingerprint, ~Pulse),
+      by = "ID"
     ) %>%
-    group_by_(~X, ~Y, ~level) %>%
+    inner_join(
+      pulses@Pulse %>%
+        select_(~ID, ~PeakX, ~PeakY),
+      by = c("Pulse" = "ID")
+    ) %>%
+    mutate_(
+      X1 = ~X1 - PeakX,
+      X2 = ~X2 - PeakY
+    ) %>%
+    group_by_(~ID) %>%
     slice_(-1) %>%
     mutate_(
-      row_id = ~seq_along(level),
-      n = ~n()
+      RowID = ~seq_along(ID),
+      N = ~n()
     )
-  pulse %>%
-    filter_(~X1 < 0) %>%
-    summarise_(
-      start = ~which.min(abs(X2))
-    ) %>%
-    inner_join(x = pulse, by = c("X", "Y", "level")) %>%
-    mutate_(row_id = ~ ((row_id - start) %% n) * 2 / n) %>%
-    do_(
-      PeakAmplitude = ~ unique(.$PeakAmplitude),
-      Fourier = ~elliptic_fourier(.)
-    ) %>%
-    unnest_(~Fourier)
+  new(
+    "batPulseParameter",
+    Recording = pulses@Recording,
+    Spectrogram = pulses@Spectrogram,
+    Pulse = pulses@Pulse,
+    Contour = pulses@Contour,
+    Parameter = pulse %>%
+      filter_(~X1 < 0) %>%
+      summarise_(
+        Start = ~which.min(abs(X2))
+      ) %>%
+      inner_join(x = pulse, by = "ID") %>%
+      mutate_(RowID = ~ ((RowID - Start) %% N) * 2 / N) %>%
+      do_(
+        Fourier = ~elliptic_fourier(.)
+      ) %>%
+      unnest_(~Fourier)
+  )
 }

@@ -38,6 +38,7 @@ wav2rds <- function(
         contour.step = contour.step,
         contour.n = contour.n
       ) %>%
+      pulse_parameter() %>%
       saveRDS(file = target)
   }
   return(invisible(NULL))

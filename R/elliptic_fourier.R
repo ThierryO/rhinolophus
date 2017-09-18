@@ -8,7 +8,7 @@
 elliptic_fourier <- function(x, f_max = 30){
   f <- pmin(nrow(x) %/% 2 - 1, f_max)
   form <- seq_len(f) %>%
-    sprintf(fmt = "I(sinpi(%1$i * row_id)) + I(cospi(%1$i * row_id))") %>%
+    sprintf(fmt = "I(sinpi(%1$i * RowID)) + I(cospi(%1$i * RowID))") %>%
     paste(collapse = "+")
   lm_x <- lm(as.formula(paste("X1~", form)), data = x)
   lm_y <- lm(as.formula(paste("X2~", form)), data = x)
