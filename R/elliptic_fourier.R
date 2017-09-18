@@ -3,7 +3,7 @@
 #' @param f_max the maximum cyclic frequency
 #' @export
 #' @importFrom dplyr %>% mutate_
-#' @importFrom stats lm formula coef
+#' @importFrom stats lm as.formula coef
 #' @importFrom tidyr gather_
 elliptic_fourier <- function(x, f_max = 30){
   f <- pmin(nrow(x) %/% 2 - 1, f_max)

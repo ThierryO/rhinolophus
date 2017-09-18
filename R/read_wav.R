@@ -6,6 +6,7 @@
 #' @export
 #' @importFrom tuneR readWave
 #' @importFrom assertthat assert_that is.string is.number
+#' @importFrom utils file_test
 #' @examples
 #'  wav = read_wav(
 #'    system.file("demo_wav/leislers.wav", package = "rhinolophus")

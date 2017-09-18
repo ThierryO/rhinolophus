@@ -3,8 +3,7 @@
 #' Holds the relevant content of wav files
 #' @section Slots:
 #'   \describe{
-#'    \item{\code{Recording}}{The metadata on the recording}
-#'    \item{\code{SpecGram}}{The actual spectrogram}
+#'    \item{\code{Plot}}{A SpatialPolygonsDataFrame with the contours}
 #'   }
 #' @name batPulse-class
 #' @rdname batPulse-class

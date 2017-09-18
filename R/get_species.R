@@ -2,6 +2,9 @@
 #' @export
 #' @importFrom dplyr data_frame %>% mutate_ select_ arrange_
 #' @importFrom tidyr extract_ unnest_ spread_
+#' @importFrom utils write.csv2
+#' @param path the path of the recordings
+#' @param write_csv store the data.frame to a csv file
 get_species <- function(path, write_csv = TRUE) {
   species <- data_frame(
     filename = list.files(
@@ -19,7 +22,7 @@ get_species <- function(path, write_csv = TRUE) {
     extract_(
       "filename",
       into = c("tmp", "channel", "original"),
-      regex = "(.*)µ(.*)µ(.*)",
+      regex = "(.*)\u00B5(.*)\u00B5(.*)", #\u00B5 stands for mu
       remove = FALSE
     ) %>%
     mutate_(

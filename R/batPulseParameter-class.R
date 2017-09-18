@@ -3,8 +3,7 @@
 #' Holds the relevant content of wav files
 #' @section Slots:
 #'   \describe{
-#'    \item{\code{Recording}}{The metadata on the recording}
-#'    \item{\code{SpecGram}}{The actual spectrogram}
+#'    \item{\code{Parameter}}{A data.frame with pulse parameters for each contour}
 #'   }
 #' @name batPulseParameter-class
 #' @rdname batPulseParameter-class

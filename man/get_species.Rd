@@ -6,6 +6,11 @@
 \usage{
 get_species(path, write_csv = TRUE)
 }
+\arguments{
+\item{path}{the path of the recordings}
+
+\item{write_csv}{store the data.frame to a csv file}
+}
 \description{
 get the species information of all recordings in a directory
 }

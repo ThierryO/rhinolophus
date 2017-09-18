@@ -1,6 +1,6 @@
 #' get contours as SpatialPolygons
 #' @importFrom raster rasterToContour
-#' @importFrom sp coordinates Polygon Polygons SpatialPolygonsDataFrame
+#' @importFrom sp coordinates Polygon Polygons SpatialPolygons SpatialPolygonsDataFrame
 #' @export
 #' @param x a raster
 #' @param levels a vector with the required levels

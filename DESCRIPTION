@@ -19,7 +19,6 @@ Imports:
     methods,
     class
 Depends:
-    kohonen,
     sp,
     raster
 Suggests:

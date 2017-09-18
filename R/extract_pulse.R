@@ -3,7 +3,7 @@
 #' @importFrom raster raster xres focal cellStats maxValue xyFromCell xmin xmax ymin ymax extent crop mask which.max
 #' @importFrom dplyr %>% select_ inner_join slice_ mutate_ transmute_ rowwise distinct_ ungroup
 #' @importFrom utils tail
-#' @importFrom sp coordinates
+#' @importFrom sp coordinates<-
 #' @importFrom rgeos gContains
 #' @param spectrogram a spectrogram
 #' @param min.peak minimum amplitude of the peak. Defaults to 30 dB.

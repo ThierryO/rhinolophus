@@ -4,6 +4,8 @@
 #' @param overlap The overlap of two windows. Defaults to 0.9.
 #' @importFrom assertthat assert_that has_name is.number
 #' @importFrom signal specgram
+#' @importFrom stats median
+#' @importFrom methods validObject
 #' @export
 #' @examples
 #'  wav2spectrogram(
