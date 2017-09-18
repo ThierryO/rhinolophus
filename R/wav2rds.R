@@ -25,21 +25,30 @@ wav2rds <- function(
     recursive = TRUE,
     full.names = TRUE
   )
-  for (filename in available) {
-    message(filename)
-    target <- gsub("\\.(wav|WAV)$", ".rds", filename)
-    if (file.exists(target) & !overwrite) {
-      next
+  sapply(
+    sample(available),
+    function(filename) {
+      message(filename)
+      target <- gsub("\\.(wav|WAV)$", ".rds", filename)
+      if (file.exists(target) & !overwrite) {
+        return("exists")
+      }
+      test <- try(
+        read_wav(filename, te.factor = te.factor, channel = channel) %>%
+        wav2spectrogram(window.ms = window.ms, overlap = overlap) %>%
+        extract_pulse(
+          min.peak = min.peak,
+          contour.step = contour.step,
+          contour.n = contour.n
+        ) %>%
+        pulse_parameter() %>%
+        saveRDS(file = target)
+      )
+      if (inherits(test, "try-error")) {
+        return(paste("error in", filename))
+      } else {
+        return("parameters stored")
+      }
     }
-    read_wav(filename, te.factor = te.factor, channel = channel) %>%
-      wav2spectrogram(window.ms = window.ms, overlap = overlap) %>%
-      extract_pulse(
-        min.peak = min.peak,
-        contour.step = contour.step,
-        contour.n = contour.n
-      ) %>%
-      pulse_parameter() %>%
-      saveRDS(file = target)
-  }
-  return(invisible(NULL))
+  )
 }
