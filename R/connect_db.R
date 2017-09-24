@@ -22,12 +22,15 @@ connect_db <- function(path){
   dbClearResult(res)
   res <- dbSendQuery(
     connection, "
-    CREATE UNIQUE INDEX idx_recording_fingerprint ON recording (fingerprint)
+    CREATE UNIQUE INDEX IF NOT EXISTS
+      idx_recording_fingerprint
+    ON
+      recording (fingerprint)
   ")
   dbClearResult(res)
   res <- dbSendQuery(
     connection, "
-    CREATE INDEX idx_recording_timestamp ON recording (timestamp)
+    CREATE INDEX IF NOT EXISTS idx_recording_timestamp ON recording (timestamp)
   ")
   dbClearResult(res)
   res <- dbSendQuery(
@@ -45,7 +48,10 @@ connect_db <- function(path){
   dbClearResult(res)
   res <- dbSendQuery(
     connection, "
-    CREATE UNIQUE INDEX idx_spectrogram_fingerprint ON spectrogram (fingerprint)
+    CREATE UNIQUE INDEX IF NOT EXISTS
+      idx_spectrogram_fingerprint
+    ON
+      spectrogram (fingerprint)
   ")
   dbClearResult(res)
   res <- dbSendQuery(
@@ -63,7 +69,10 @@ connect_db <- function(path){
   dbClearResult(res)
   res <- dbSendQuery(
     connection, "
-    CREATE UNIQUE INDEX idx_pulse_fingerprint ON pulse (fingerprint)
+    CREATE UNIQUE INDEX IF NOT EXISTS
+      idx_pulse_fingerprint
+    ON
+      pulse (fingerprint)
   ")
   dbClearResult(res)
   res <- dbSendQuery(
@@ -81,7 +90,10 @@ connect_db <- function(path){
   dbClearResult(res)
   res <- dbSendQuery(
     connection, "
-    CREATE UNIQUE INDEX idx_contour_fingerprint ON contour (fingerprint)
+    CREATE UNIQUE INDEX IF NOT EXISTS
+      idx_contour_fingerprint
+    ON
+      contour (fingerprint)
   ")
   dbClearResult(res)
   res <- dbSendQuery(
@@ -94,7 +106,7 @@ connect_db <- function(path){
   dbClearResult(res)
   res <- dbSendQuery(
     connection, "
-    CREATE UNIQUE INDEX
+    CREATE UNIQUE INDEX IF NOT EXISTS
       idx_parameter_type_description
     ON
       parameter_type (description)
@@ -114,7 +126,7 @@ connect_db <- function(path){
   dbClearResult(res)
   res <- dbSendQuery(
     connection, "
-    CREATE UNIQUE INDEX
+    CREATE UNIQUE INDEX IF NOT EXISTS
       idx_parameter_contour_harmonic_type
     ON
       parameter (contour, harmonic, parameter_type)
