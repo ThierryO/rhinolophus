@@ -3,14 +3,14 @@
 #' @param x a batPulse object
 #' @param connection a DBI connection to the database
 #' @importFrom digest sha1
-#' @importFrom dplyr %>% tbl select_ inner_join collect mutate_ anti_join semi_join bind_rows transmute_ summarise_ left_join compute
+#' @importFrom dplyr %>% tbl select_ inner_join collect mutate_ anti_join semi_join bind_rows transmute_ summarise_ left_join compute n
 #' @importFrom dbplyr src_dbi
 #' @importFrom RSQLite dbWriteTable dbRemoveTable
 batpulse2db <- function(x, connection){
 
   check_fingerprint <- function(src, table, current){
-    hash <- sha1(current)
-    dbWriteTable(src$con, hash, current, temporary = TRUE)
+    hash <- paste0("tmp", sha1(current))
+    dbWriteTable(src$con, hash, current, temporary = TRUE, overwrite = TRUE)
     # existing fingerprint
     existing <- tbl(src, table) %>%
       select_(~fingerprint, ~id) %>%
@@ -24,13 +24,20 @@ batpulse2db <- function(x, connection){
     old_id <- tbl(src, hash) %>%
       anti_join(tbl(src, table), by = c("Fingerprint" = "fingerprint")) %>%
       semi_join(tbl(src, table), by = c("old_id" = "id")) %>%
-      collect() %>%
-      mutate_(
-        exists = FALSE,
-        duplicate = TRUE
-      )
+      collect()
     if (nrow(old_id)) {
-      stop("existing id")
+      old_id <- check_fingerprint(
+        src = src,
+        table = table,
+        current = old_id %>%
+          transmute_(~Fingerprint, old_id = ~sample(.Machine$integer.max, n()))
+      ) %>%
+        select_(~Fingerprint, ~id) %>%
+        inner_join(old_id, by = "Fingerprint") %>%
+        mutate_(
+          exists = FALSE,
+          duplicate = TRUE
+        )
     }
     # new fingerprint and new id
     new_id <- tbl(src, hash) %>%
@@ -52,7 +59,14 @@ batpulse2db <- function(x, connection){
     select_(~Fingerprint, old_id = ~ID) %>%
     check_fingerprint(src = src, table = "recording")
   if (any(checked_id$duplicate)) {
-    stop("to do: recording id")
+    x@Spectrogram <- checked_id %>%
+      select_(~old_id, Recording = ~id) %>%
+      inner_join(x@Spectrogram, by = c("old_id" = "Recording")) %>%
+      select_(~-old_id)
+    x@Recording <- checked_id %>%
+      select_(~old_id, ID = ~id) %>%
+      inner_join(x@Recording, by = c("old_id" = "ID")) %>%
+      select_(~-old_id)
   }
   checked_id %>%
     filter_(~!exists) %>%
@@ -73,7 +87,14 @@ batpulse2db <- function(x, connection){
     select_(~Fingerprint, old_id = ~ID) %>%
     check_fingerprint(src = src, table = "spectrogram")
   if (any(checked_id$duplicate)) {
-    stop("to do: spectrogram id")
+    x@Pulse <- checked_id %>%
+      select_(~old_id, Spectrogram = ~id) %>%
+      inner_join(x@Pulse, by = c("old_id" = "Spectrogram")) %>%
+      select_(~-old_id)
+    x@Spectrogram <- checked_id %>%
+      select_(~old_id, ID = ~id) %>%
+      inner_join(x@Spectrogram, by = c("old_id" = "ID")) %>%
+      select_(~-old_id)
   }
   checked_id %>%
     filter_(~!exists) %>%
@@ -93,7 +114,14 @@ batpulse2db <- function(x, connection){
     select_(~Fingerprint, old_id = ~ID) %>%
     check_fingerprint(src = src, table = "pulse")
   if (any(checked_id$duplicate)) {
-    stop("to do: pulse id")
+    x@Contour <- checked_id %>%
+      select_(~old_id, Pulse = ~id) %>%
+      inner_join(x@Contour, by = c("old_id" = "Pulse")) %>%
+      select_(~-old_id)
+    x@Pulse <- checked_id %>%
+      select_(~old_id, ID = ~id) %>%
+      inner_join(x@Pulse, by = c("old_id" = "ID")) %>%
+      select_(~-old_id)
   }
   checked_id %>%
     filter_(~!exists) %>%
@@ -113,7 +141,14 @@ batpulse2db <- function(x, connection){
     select_(~Fingerprint, old_id = ~ID) %>%
     check_fingerprint(src = src, table = "contour")
   if (any(checked_id$duplicate)) {
-    stop("to do: contour id")
+    x@Parameter <- checked_id %>%
+      select_(~old_id, ID = ~id) %>%
+      inner_join(x@Parameter, by = c("old_id" = "ID")) %>%
+      select_(~-old_id)
+    x@Contour <- checked_id %>%
+      select_(~old_id, ID = ~id) %>%
+      inner_join(x@Contour, by = c("old_id" = "ID")) %>%
+      select_(~-old_id)
   }
   checked_id %>%
     filter_(~!exists) %>%
@@ -160,15 +195,36 @@ batpulse2db <- function(x, connection){
       parameter_type = ~id,
       value = ~Value
     )
-  hash <- sha1(values)
-  dbWriteTable(connection, hash, values, temporary = TRUE)
-  tbl(src, hash) %>%
+  hash <- paste0("tmp", sha1(values))
+  dbWriteTable(connection, hash, values, temporary = TRUE, overwrite = TRUE)
+  res <- dbSendQuery(
+    connection, sprintf("
+    CREATE UNIQUE INDEX IF NOT EXISTS
+      idx_%1$s
+    ON
+      %1$s (contour, harmonic, parameter_type)
+  ", hash))
+  dbClearResult(res)
+  junk <- tbl(src, hash) %>%
     anti_join(
       tbl(src, "parameter"),
       by = c("contour", "harmonic", "parameter_type")
     ) %>%
-    compute("parameter", append = TRUE)
+    compute(paste0(hash, "2"), temporary = TRUE, overwrite = TRUE)
+  res <- dbSendQuery(
+    connection,
+    sprintf("
+      INSERT INTO
+        parameter (contour, harmonic, parameter_type, value)
+      SELECT
+        contour, harmonic, parameter_type, value
+      FROM %s2",
+      hash
+    )
+  )
+  dbClearResult(res)
   dbRemoveTable(connection, hash)
+  dbRemoveTable(connection, paste0(hash, "2"))
 
   return(invisible(NULL))
 }
