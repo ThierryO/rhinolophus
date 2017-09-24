@@ -30,14 +30,15 @@ get_contours <- function(x, levels){
         } else {
           polygons <- lapply(seq_along(closed_lines), function(j){
             polygon <- Polygon(closed_lines[[j]])
-            Polygons(list(polygon), ID = j + i * 1e6)
+            Polygons(list(polygon), ID = sprintf("%06i%06i", j, i))
           })
           polygons <- SpatialPolygons(polygons)
           dataset <- data.frame(
-            ID = as.character(seq_along(closed_lines) + i * 1e6),
-            ContourAmplitude = contour_line$level[i]
+            ID = sprintf("%06i%06i", seq_along(closed_lines), i),
+            ContourAmplitude = contour_line$level[i],
+            stringsAsFactors = FALSE
           )
-          rownames(dataset) <- seq_along(closed_lines) + i * 1e6
+          rownames(dataset) <- dataset$ID
           SpatialPolygonsDataFrame(Sr = polygons, data = dataset)
         }
     }
