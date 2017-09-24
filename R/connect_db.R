@@ -12,6 +12,7 @@ connect_db <- function(path){
     CREATE TABLE IF NOT EXISTS recording (
       id INTEGER PRIMARY KEY,
       fingerprint TEXT NOT NULL,
+      filename TEXT NOT NULL,
       timestamp INTEGER NOT NULL,
       sample_rate INTEGER NOT NULL,
       t_e_factor INTEGER NOT NULL,
@@ -102,14 +103,13 @@ connect_db <- function(path){
   res <- dbSendQuery(
     connection, "
     CREATE TABLE IF NOT EXISTS parameter (
-      id INTEGER PRIMARY KEY,
       contour INTEGER NOT NULL,
       harmonic INTEGER NOT NULL,
       parameter_type integer NOT NULL,
       value REAL NOT NULL,
       FOREIGN KEY (contour) REFERENCES contour (id),
       FOREIGN KEY (parameter_type) REFERENCES parameter_type (id)
-    ) WITHOUT ROWID
+    )
   ")
   dbClearResult(res)
   res <- dbSendQuery(
