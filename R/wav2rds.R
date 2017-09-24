@@ -28,7 +28,7 @@ wav2rds <- function(
   sapply(
     sample(available),
     function(filename) {
-      message(filename)
+      message("\n", filename)
       target <- gsub("\\.(wav|WAV)$", ".rds", filename)
       if (file.exists(target) & !overwrite) {
         return("exists")
@@ -45,8 +45,12 @@ wav2rds <- function(
         saveRDS(file = target)
       )
       if (inherits(test, "try-error")) {
+        rm(test)
+        gc()
         return(paste("error in", filename))
       } else {
+        rm(test)
+        gc()
         return("parameters stored")
       }
     }
