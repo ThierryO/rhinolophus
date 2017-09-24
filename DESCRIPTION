@@ -16,6 +16,7 @@ Imports:
     tidyr,
     dplyr,
     digest,
+    dbplyr,
     RSQLite,
     methods,
     class
@@ -39,6 +40,7 @@ Collate:
     'batSpectrogram-class.R'
     'batWav-class.R'
     'bat_wav.R'
+    'batpulse2db.R'
     'connect_db.R'
     'correct_timestamp.R'
     'elliptic_fourier.R'
