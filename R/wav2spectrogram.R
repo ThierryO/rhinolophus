@@ -45,7 +45,8 @@ wav2spectrogram <- function(wav, window.ms = 1, overlap = 0.9){
     WindowMS = window.ms,
     WindowN = window.n,
     Overlap = overlap,
-    Recording = wav@Recording$ID
+    Recording = wav@Recording$ID,
+    stringsAsFactors = FALSE
   )
   new(
     "batSpectrogram",
