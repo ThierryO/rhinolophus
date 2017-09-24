@@ -50,6 +50,7 @@ Collate:
     'get_species.R'
     'next_power_2.R'
     'pulse_parameter.R'
+    'rds2db.R'
     'read_wav.R'
     'wav2rds.R'
     'wav2spectrogram.R'
