@@ -73,16 +73,21 @@ extract_pulse <- function(spectrogram, min.peak = 30, contour.step = 10, contour
     distinct_(~PeakX, ~PeakY, ~PeakAmplitude) %>%
     mutate_(Spectrogram = ~spectrogram@Spectrogram$Fingerprint) %>%
     rowwise() %>%
-    mutate_(Fingerprint = ~sha1(.)) %>%
+    mutate_(
+      Fingerprint = ~list(
+        PeakX = PeakX,
+        PeakY = PeakY,
+        PeakAmplitude = PeakAmplitude,
+        Spectrogram = Spectrogram
+      ) %>%
+        sha1()
+    ) %>%
     ungroup() %>%
     mutate_(
       ID = ~ seq_along(Fingerprint),
       Spectrogram = ~1
     )
   contours$ID <- seq_along(contours$ID)
-  get_coords <- function(id){
-
-  }
   contour.meta <- pulse.meta %>%
     select_(~PeakX, ~PeakY, ~PeakAmplitude, Pulse = ~Fingerprint) %>%
     inner_join(contours@data, by = c("PeakX", "PeakY", "PeakAmplitude")) %>%
