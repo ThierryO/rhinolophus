@@ -57,6 +57,7 @@ shinyServer(function(input, output, session) {
     if (length(data$filename) == 0) {
       return(NULL)
     }
+    removeTmpFiles(h = 1/60)
     sonogram <- read_wav(
       data$filename,
       channel = gsub(",.*$", "", input$channel),
