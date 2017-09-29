@@ -7,18 +7,30 @@
 rds2db <- function(path, db_path = path){
   db_path <- normalizePath(db_path)
   connection <- connect_db(db_path)
-  list.files(path, pattern = "rds$", recursive = TRUE, full.names = TRUE) %>%
+  stored <- list.files(
+    path,
+    pattern = "rds$",
+    recursive = TRUE,
+    full.names = TRUE
+  ) %>%
     sample() %>%
     sapply(
       function(file, connection){
         message(file)
-        try(
-          readRDS(file) %>%
-            batpulse2db(connection)
-        )
+        rds <- try(readRDS(file))
+        if (inherits(rds, "try-error")) {
+          file.remove(file)
+          return("rds error")
+        }
+        stored <- try(batpulse2db(x = rds, connection = connection))
+        if (inherits(stored, "try-error")) {
+          return("db error")
+        } else {
+          return("stored")
+        }
       },
       connection = connection
     )
   dbDisconnect(connection)
-  return(db_path)
+  return(list(db_path = db_path, stored = stored))
 }
