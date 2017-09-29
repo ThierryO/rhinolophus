@@ -5,6 +5,7 @@
 #' @importFrom dplyr %>%
 #' @importFrom RSQLite dbDisconnect
 rds2db <- function(path, db_path = path){
+  db_path <- normalizePath(db_path)
   connection <- connect_db(db_path)
   list.files(path, pattern = "rds$", recursive = TRUE, full.names = TRUE) %>%
     sapply(
@@ -16,5 +17,5 @@ rds2db <- function(path, db_path = path){
       connection = connection
     )
   dbDisconnect(connection)
-  return(invisible(NULL))
+  return(db_path)
 }
