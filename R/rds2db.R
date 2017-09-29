@@ -8,11 +8,14 @@ rds2db <- function(path, db_path = path){
   db_path <- normalizePath(db_path)
   connection <- connect_db(db_path)
   list.files(path, pattern = "rds$", recursive = TRUE, full.names = TRUE) %>%
+    sample() %>%
     sapply(
       function(file, connection){
         message(file)
-        readRDS(file) %>%
-          batpulse2db(connection)
+        try(
+          readRDS(file) %>%
+            batpulse2db(connection)
+        )
       },
       connection = connection
     )
