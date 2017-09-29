@@ -3,6 +3,7 @@
 #' @param db_path the path to the database
 #' @export
 #' @importFrom dplyr %>%
+#' @importFrom RSQLite dbDisconnect
 rds2db <- function(path, db_path = path){
   connection <- connect_db(db_path)
   list.files(path, pattern = "rds$", recursive = TRUE, full.names = TRUE) %>%
@@ -14,5 +15,6 @@ rds2db <- function(path, db_path = path){
       },
       connection = connection
     )
+  dbDisconnect(connection)
   return(invisible(NULL))
 }
