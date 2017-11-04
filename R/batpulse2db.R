@@ -70,8 +70,8 @@ batpulse2db <- function(x, connection){
   }
   checked_id %>%
     filter_(~!exists) %>%
-    select_(~old_id, ~id) %>%
-    inner_join(x@Recording, by = c("old_id" = "ID")) %>%
+    select_(~id) %>%
+    inner_join(x@Recording, by = c("id" = "ID")) %>%
     transmute_(
       ~id,
       fingerprint = ~Fingerprint,
@@ -80,8 +80,8 @@ batpulse2db <- function(x, connection){
       sample_rate = ~as.integer(SampleRate),
       t_e_factor = ~as.integer(TEFactor),
       left_channel = ~as.integer(LeftChannel)
-      ) %>%
-      dbWriteTable(conn = connection, name = "recording", append = TRUE)
+    ) %>%
+    dbWriteTable(conn = connection, name = "recording", append = TRUE)
 
   checked_id <- x@Spectrogram %>%
     select_(~Fingerprint, old_id = ~ID) %>%
@@ -98,8 +98,8 @@ batpulse2db <- function(x, connection){
   }
   checked_id %>%
     filter_(~!exists) %>%
-    select_(~old_id, ~id) %>%
-    inner_join(x@Spectrogram, by = c("old_id" = "ID")) %>%
+    select_(~id) %>%
+    inner_join(x@Spectrogram, by = c("id" = "ID")) %>%
     transmute_(
       ~id,
       fingerprint = ~Fingerprint,
@@ -125,8 +125,8 @@ batpulse2db <- function(x, connection){
   }
   checked_id %>%
     filter_(~!exists) %>%
-    select_(~old_id, ~id) %>%
-    inner_join(x@Pulse, by = c("old_id" = "ID")) %>%
+    select_(~id) %>%
+    inner_join(x@Pulse, by = c("id" = "ID")) %>%
     transmute_(
       ~id,
       fingerprint = ~Fingerprint,
@@ -152,8 +152,8 @@ batpulse2db <- function(x, connection){
   }
   checked_id %>%
     filter_(~!exists) %>%
-    select_(~old_id, ~id) %>%
-    inner_join(x@Contour, by = c("old_id" = "ID")) %>%
+    select_(~id) %>%
+    inner_join(x@Contour, by = c("id" = "ID")) %>%
     transmute_(
       ~id,
       fingerprint = ~Fingerprint,
