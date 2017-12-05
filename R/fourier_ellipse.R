@@ -46,9 +46,17 @@ fourier_ellipse <- function(fourier_param) {
   semi.axes <- sqrt(
     c(num / (den1 * (den2 - den3)),  num / (den1 * (-den2 - den3)))
   )
-  names(semi.axes) <- c("major", "minor")
   # calculate the angle of rotation
   angle <- atan2(f[2], f[1] - f[3]) / 2
   names(angle) <- "rotation"
+  if (semi.axes[1] < semi.axes[2]) {
+    semi.axes <- rev(semi.axes)
+    if (angle > 0) {
+      angle <- angle - pi / 2
+    } else {
+      angle <- angle + pi / 2
+    }
+  }
+  names(semi.axes) <- c("major", "minor")
   c(semi.axes, angle)
 }
