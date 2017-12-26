@@ -10,6 +10,7 @@ wav2rds <- function(
   path,
   te.factor = 1,
   channel = c("left", "right"),
+  max.length = 5,
   window.ms = 1,
   overlap = 0.9,
   min.peak = 30,
@@ -34,15 +35,20 @@ wav2rds <- function(
         return("exists")
       }
       test <- try(
-        read_wav(filename, te.factor = te.factor, channel = channel) %>%
-        wav2spectrogram(window.ms = window.ms, overlap = overlap) %>%
-        extract_pulse(
-          min.peak = min.peak,
-          contour.step = contour.step,
-          contour.n = contour.n
+        read_wav(
+          filename,
+          te.factor = te.factor,
+          channel = channel,
+          max.length = max.length
         ) %>%
-        pulse_parameter() %>%
-        saveRDS(file = target)
+          wav2spectrogram(window.ms = window.ms, overlap = overlap) %>%
+          extract_pulse(
+            min.peak = min.peak,
+            contour.step = contour.step,
+            contour.n = contour.n
+          ) %>%
+          pulse_parameter() %>%
+          saveRDS(file = target)
       )
       if (inherits(test, "try-error")) {
         rm(test)

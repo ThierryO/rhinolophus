@@ -1,6 +1,8 @@
 #' read a WAV file
 #' @param filename The name of the file
 #' @param channel Select the left or the right channel
+#' @param max.length Maximum length of the recording to use in seconds. If the
+#' recording is longer, the last part is ignored.
 #' @param te.factor The factor to which the original sound was slowed down prior
 #'    to recording
 #' @export
@@ -14,6 +16,7 @@
 read_wav <- function(
   filename,
   channel = c("left", "right"),
+  max.length = 5,
   te.factor = 10
 ){
   channel <- match.arg(channel)
@@ -25,7 +28,12 @@ read_wav <- function(
 
 
   header <- readWave(filename, header = TRUE)
-  raw.data <- readWave(filename)
+  raw.data <- readWave(
+    filename = filename,
+    from = 1,
+    to = pmin(header$samples, header$sample.rate * te.factor * max.length),
+    units = "samples"
+  )
   if (channel == "left") {
     selected.channel <- raw.data@left
   } else {

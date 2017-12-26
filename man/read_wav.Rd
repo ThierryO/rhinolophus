@@ -4,12 +4,16 @@
 \alias{read_wav}
 \title{read a WAV file}
 \usage{
-read_wav(filename, channel = c("left", "right"), te.factor = 10)
+read_wav(filename, channel = c("left", "right"), max.length = 5,
+  te.factor = 10)
 }
 \arguments{
 \item{filename}{The name of the file}
 
 \item{channel}{Select the left or the right channel}
+
+\item{max.length}{Maximum length of the recording to use in seconds. If the
+recording is longer, the last part is ignored.}
 
 \item{te.factor}{The factor to which the original sound was slowed down prior
 to recording}

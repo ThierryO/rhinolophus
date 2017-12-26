@@ -4,9 +4,9 @@
 \alias{wav2rds}
 \title{Extract pulses and store them in an rds file}
 \usage{
-wav2rds(path, te.factor = 1, channel = c("left", "right"), window.ms = 1,
-  overlap = 0.9, min.peak = 30, contour.step = 10, contour.n = 3,
-  overwrite = FALSE)
+wav2rds(path, te.factor = 1, channel = c("left", "right"), max.length = 5,
+  window.ms = 1, overlap = 0.9, min.peak = 30, contour.step = 10,
+  contour.n = 3, overwrite = FALSE)
 }
 \arguments{
 \item{path}{the path of the files}
@@ -15,6 +15,9 @@ wav2rds(path, te.factor = 1, channel = c("left", "right"), window.ms = 1,
 to recording}
 
 \item{channel}{Select the left or the right channel}
+
+\item{max.length}{Maximum length of the recording to use in seconds. If the
+recording is longer, the last part is ignored.}
 
 \item{window.ms}{The size of the window in microseconds. Default to 1.}
 
