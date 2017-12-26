@@ -22,8 +22,8 @@ elliptic_fourier <- function(x, f_max = 30){
     function(i){
       data.frame(
         Harmonic = i,
-        Type = c("major", "minor", "rotation"),
-        Value = fourier_ellipse(fourier_param = coefs[(i - 1) * 2 + 2:3, ]),
+        Type = c("sin_time", "cos_time", "sin_frequency", "cos_frequency"),
+        Value = as.vector(coefs[(i - 1) * 2 + 2:3, ]),
         stringsAsFactors = FALSE
       )
     }
@@ -31,7 +31,7 @@ elliptic_fourier <- function(x, f_max = 30){
     do.call(what = rbind)
   data.frame(
     Harmonic = 0,
-    Type = c("x", "y"),
+    Type = c("d_time", "d_frequency"),
     Value = c(coef(lm_x)[1], coef(lm_y)[1]),
     stringsAsFactors = FALSE
   ) %>%

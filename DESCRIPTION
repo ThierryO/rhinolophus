@@ -45,7 +45,6 @@ Collate:
     'correct_timestamp.R'
     'elliptic_fourier.R'
     'extract_pulse.R'
-    'fourier_ellipse.R'
     'get_contours.R'
     'get_species.R'
     'next_power_2.R'
