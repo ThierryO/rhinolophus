@@ -9,25 +9,26 @@ Description: Extract bat sounds from wav files, calculate metrics on those
     sounds and try to identify the species.
 License: GPL-3
 Imports:
-    tuneR,
-    signal,
-    rgeos,
     assertthat,
-    tidyr,
-    dplyr,
-    digest,
+    class,
     dbplyr,
-    RSQLite,
+    digest,
+    dplyr,
     methods,
-    class
+    rlang,
+    rgeos,
+    RSQLite,
+    signal,
+    tidyr,
+    tuneR
 Depends:
-    sp,
-    raster
+    raster,
+    sp
 Suggests:
-    testthat,
+    igraph,
     shiny,
     shinyFiles,
-    igraph
+    testthat
 RoxygenNote: 6.0.1
 Collate: 
     'batWavMeta-class.R'
@@ -43,6 +44,7 @@ Collate:
     'batpulse2db.R'
     'connect_db.R'
     'correct_timestamp.R'
+    'db2ml.R'
     'elliptic_fourier.R'
     'extract_pulse.R'
     'get_contours.R'
