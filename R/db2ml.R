@@ -4,7 +4,7 @@
 #' @param contour.amplitude the amplitude of the contour to extract
 #' @export
 #' @importFrom assertthat assert_that is.count is.number
-#' @importFrom RSQLite dbConnect SQLite
+#' @importFrom RSQLite dbConnect SQLite dbDisconnect
 #' @importFrom dplyr %>% tbl filter_ select inner_join transmute semi_join collect group_by summarise mutate
 #' @importFrom dbplyr src_dbi
 #' @importFrom rlang .data
@@ -80,5 +80,6 @@ db2ml <- function(db.path, n.harmonic = 20, contour.amplitude = -25) {
   attr(z, "peak_amplitude") <- 100
   attr(z, "d_frequency") <- 100
   attr(z, "d_time") <- 10
+  dbDisconnect(connection)
   return(z)
 }
