@@ -14,6 +14,7 @@ Imports:
     dbplyr,
     digest,
     dplyr,
+    kohonen,
     methods,
     rlang,
     rgeos,
@@ -40,6 +41,7 @@ Collate:
     'import_S3_classes.R'
     'batSpectrogram-class.R'
     'batWav-class.R'
+    'bat_som.R'
     'bat_wav.R'
     'batpulse2db.R'
     'connect_db.R'
