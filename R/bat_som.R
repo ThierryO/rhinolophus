@@ -14,10 +14,10 @@ bat_som <- function(
     as.matrix(x[, colnames(x) != "pulse"]),
     grid = somgrid(xdim = dims[1], ydim = dims[2], topo = topo)
   )
-  attr(x_som, "maxL1") <- attr(x, "maxL1")
-  attr(x_som, "peak_frequency") <- attr(x, "peak_frequency")
-  attr(x_som, "peak_amplitude") <- attr(x, "peak_amplitude")
-  attr(x_som, "d_frequency") <- attr(x, "d_frequency")
-  attr(x_som, "d_time") <- attr(x, "d_time")
+  attr(x_som$codes[[1]], "maxL1") <- attr(x, "maxL1")
+  attr(x_som$codes[[1]], "peak_frequency") <- attr(x, "peak_frequency")
+  attr(x_som$codes[[1]], "peak_amplitude") <- attr(x, "peak_amplitude")
+  attr(x_som$codes[[1]], "d_frequency") <- attr(x, "d_frequency")
+  attr(x_som$codes[[1]], "d_time") <- attr(x, "d_time")
   return(x_som)
 }
