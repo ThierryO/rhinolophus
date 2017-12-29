@@ -55,6 +55,7 @@ Collate:
     'pulse_parameter.R'
     'rds2db.R'
     'read_wav.R'
+    'reconstruct.R'
     'unscale.R'
     'wav2rds.R'
     'wav2spectrogram.R'
