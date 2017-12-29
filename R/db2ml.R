@@ -5,7 +5,7 @@
 #' @export
 #' @importFrom assertthat assert_that is.count is.number
 #' @importFrom RSQLite dbConnect SQLite
-#' @importFrom dplyr %>% tbl filter_ select inner_join transmute semi_join collect group_by summarise
+#' @importFrom dplyr %>% tbl filter_ select inner_join transmute semi_join collect group_by summarise mutate
 #' @importFrom dbplyr src_dbi
 #' @importFrom rlang .data
 #' @importFrom tidyr spread
@@ -38,14 +38,17 @@ db2ml <- function(db.path, n.harmonic = 20, contour.amplitude = -25) {
     collect() %>%
     transmute(
       .data$contour,
-      harmonic = sprintf("%s%02i", .data$description, .data$harmonic),
+      harmonic = sprintf("h%02i%s", .data$harmonic, .data$description),
       .data$value
     )
   fourier <- fourier %>%
     group_by(.data$contour) %>%
     summarise(L1 = sum(abs(.data$value))) %>%
     inner_join(fourier, by = "contour") %>%
+    mutate(value = .data$value * 2 / .data$L1) %>%
     spread("harmonic", "value", fill = 0)
+  max.L1 <- max(fourier$L1)
+  fourier$L1 <- fourier$L1 / max.L1
 
   center <- tbl(src, "parameter") %>%
     semi_join(relevant, by = c("contour" = "id")) %>%
@@ -57,11 +60,25 @@ db2ml <- function(db.path, n.harmonic = 20, contour.amplitude = -25) {
     ) %>%
     select("contour", "description", "value") %>%
     collect() %>%
-    spread("description", "value", fill = 0)
+    spread("description", "value", fill = 0) %>%
+    mutate(
+      d_frequency = .data$d_frequency / 100,
+      d_time = .data$d_time / 10
+    )
 
-  relevant %>%
+  z <- relevant %>%
     collect() %>%
+    mutate(
+      peak_frequency = .data$peak_frequency / 100,
+      peak_amplitude = .data$peak_amplitude / 100
+    ) %>%
     inner_join(center, by = c("id" = "contour")) %>%
     inner_join(fourier, by = c("id" = "contour")) %>%
     select(-.data$id)
+  attr(z, "maxL1") <- max.L1
+  attr(z, "peak_frequency") <- 100
+  attr(z, "peak_amplitude") <- 100
+  attr(z, "d_frequency") <- 100
+  attr(z, "d_time") <- 10
+  return(z)
 }
