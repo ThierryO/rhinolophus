@@ -4,15 +4,17 @@
 \alias{bat_som}
 \title{Calculate a self organizing map on bat pulse features}
 \usage{
-bat_som(x, dims = rep(floor(log(nrow(x))), 2), topo = c("hexagonal",
-  "rectangular"))
+bat_som(x, dims = rep(floor(log(nrow(x))), 2), topo = c("rectangular",
+  "hexagonal"), ...)
 }
 \arguments{
-\item{x}{the output of \code{db2ml()}}
+\item{x}{the output of \code{\link{db2ml}}}
 
 \item{dims}{dimensions of the grid}
 
-\item{topo}{hexagonal or rectangular topology}
+\item{topo}{rectangular or hexagonal topology}
+
+\item{...}{arguments past to \code{\link[kohonen]{som}}}
 }
 \description{
 Calculate a self organizing map on bat pulse features
