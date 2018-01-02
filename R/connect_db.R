@@ -17,7 +17,7 @@ connect_db <- function(path){
       sample_rate INTEGER NOT NULL,
       t_e_factor INTEGER NOT NULL,
       left_channel INTEGER NOT NULL
-    ) WITHOUT ROWID
+    )
   ")
   dbClearResult(res)
   res <- dbSendQuery(
@@ -43,7 +43,7 @@ connect_db <- function(path){
       window_n INTEGER NOT NULL,
       overlap REAL NOT NULL,
       FOREIGN KEY (recording) REFERENCES recording (id)
-    ) WITHOUT ROWID
+    )
   ")
   dbClearResult(res)
   res <- dbSendQuery(
@@ -64,7 +64,7 @@ connect_db <- function(path){
       peak_y REAL NOT NULL,
       peak_amplitude REAL NOT NULL,
       FOREIGN KEY (spectrogram) REFERENCES spectrogram (id)
-    ) WITHOUT ROWID
+    )
   ")
   dbClearResult(res)
   res <- dbSendQuery(
@@ -85,7 +85,7 @@ connect_db <- function(path){
       contour_step REAL NOT NULL,
       contour_amplitude REAL NOT NULL,
       FOREIGN KEY (pulse) REFERENCES pulse (id)
-    ) WITHOUT ROWID
+    )
   ")
   dbClearResult(res)
   res <- dbSendQuery(
@@ -101,7 +101,7 @@ connect_db <- function(path){
     CREATE TABLE IF NOT EXISTS parameter_type (
       id INTEGER PRIMARY KEY,
       description TEXT NOT NULL
-    ) WITHOUT ROWID
+    )
   ")
   dbClearResult(res)
   res <- dbSendQuery(
@@ -132,5 +132,117 @@ connect_db <- function(path){
       parameter (contour, harmonic, parameter_type)
   ")
   dbClearResult(res)
+
+  res <- dbSendQuery(
+    connection, "
+    CREATE TABLE IF NOT EXISTS unsupervised (
+      pulse INTEGER PRIMARY KEY,
+      class INTEGER NOT NULL,
+      distance NUMERIC NOT NULL,
+      FOREIGN KEY(pulse) REFERENCES pulse (id)
+    )
+  ")
+  dbClearResult(res)
+  res <- dbSendQuery(
+    connection, "
+    CREATE INDEX IF NOT EXISTS
+      idx_unsupervised_class
+    ON
+      unsupervised (class)
+  ")
+  dbClearResult(res)
+  res <- dbSendQuery(
+    connection, "
+    CREATE INDEX IF NOT EXISTS
+      idx_unsupervised_distance
+    ON
+      unsupervised (distance)
+  ")
+  dbClearResult(res)
+
+  res <- dbSendQuery(
+    connection, "
+    CREATE TABLE IF NOT EXISTS species (
+      id INTEGER PRIMARY KEY,
+      parent INTEGER,
+      description TEXT NOT NULL,
+      abbreviation TEXT NOT NULL,
+      FOREIGN KEY (parent) REFERENCES species (id)
+    )
+  ")
+  dbClearResult(res)
+  res <- dbSendQuery(
+    connection, "
+    CREATE INDEX IF NOT EXISTS
+      idx_species_parent
+    ON
+      species (parent)
+  ")
+  dbClearResult(res)
+  res <- dbSendQuery(
+    connection, "
+    CREATE UNIQUE INDEX IF NOT EXISTS
+      idx_species_description
+    ON
+      species (description)
+  ")
+  dbClearResult(res)
+  res <- dbSendQuery(
+    connection, "
+    CREATE UNIQUE INDEX IF NOT EXISTS
+      idx_species_abbrevation
+    ON
+      species (abbreviation)
+  ")
+  dbClearResult(res)
+
+  res <- dbSendQuery(
+    connection, "
+    CREATE TABLE IF NOT EXISTS activity (
+      id INTEGER PRIMARY KEY,
+      description TEXT NOT NULL
+    )
+  ")
+  dbClearResult(res)
+  res <- dbSendQuery(
+    connection, "
+    CREATE UNIQUE INDEX IF NOT EXISTS
+      idx_activity_description
+    ON
+      activity (description)
+  ")
+  dbClearResult(res)
+
+  res <- dbSendQuery(
+    connection, "
+    CREATE TABLE IF NOT EXISTS manual (
+      contour INTEGER PRIMARY KEY,
+      species INTEGER NOT NULL,
+      activity INTEGER NOT NULL,
+      animal INTEGER,
+      contour_amplitude INTEGER,
+      FOREIGN KEY (contour) REFERENCES contour (id),
+      FOREIGN KEY (species) REFERENCES species (id),
+      FOREIGN KEY (activity) REFERENCES activity (id)
+    )
+  ")
+  dbClearResult(res)
+  res <- dbSendQuery(
+    connection, "
+    CREATE INDEX IF NOT EXISTS
+      idx_manual_species
+    ON
+      manual (species)
+  ")
+  dbClearResult(res)
+  res <- dbSendQuery(
+    connection, "
+    CREATE INDEX IF NOT EXISTS
+      idx_manual_activity
+    ON
+      manual (activity)
+  ")
+  dbClearResult(res)
+
   return(connection)
 }
