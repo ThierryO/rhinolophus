@@ -56,19 +56,29 @@ label_unsupervised <- function(connection) {
         c.id = m.contour
       GROUP BY
         u.class
+    ),
+    cte_selection AS (
+      SELECT
+        cc.recording,
+        SUM(cc.n * cw.weight) AS total
+      FROM
+        cte_pulse AS cc
+      INNER JOIN
+        cte_weight AS cw
+      ON
+        cc.class = cw.class
+      GROUP BY
+        recording
+      ORDER BY total DESC LIMIT 1
     )
 
     SELECT
-      cc.recording,
-      SUM(cc.n * cw.weight) AS total
+      recording, filename, t_e_factor, left_channel
     FROM
-      cte_pulse AS cc
+      cte_selection AS cs
     INNER JOIN
-      cte_weight AS cw
+      recording AS r
     ON
-      cc.class = cw.class
-    GROUP BY
-      recording
-    ORDER BY total DESC LIMIT 1"
+      cs.recording = r.id"
   )
 }
