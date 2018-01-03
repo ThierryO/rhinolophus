@@ -4,11 +4,11 @@
 \alias{unsupervised}
 \title{Create a new unsupervised classification}
 \usage{
-unsupervised(db.path, n.harmonic = 10, contour.amplitude = -25,
-  dims = c(4, 4), topo = c("rectangular", "hexagonal"), ...)
+unsupervised(path, n.harmonic = 10, contour.amplitude = -25, dims = c(4,
+  4), topo = c("rectangular", "hexagonal"), ...)
 }
 \arguments{
-\item{db.path}{the path of the rhinolophus database}
+\item{path}{the path of the rhinolophus database}
 
 \item{n.harmonic}{the number of harmonics to extract}
 

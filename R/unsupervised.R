@@ -4,7 +4,7 @@
 #' @export
 #' @importFrom RSQLite dbSendQuery dbClearResult dbWriteTable dbDisconnect
 unsupervised <- function(
-  db.path,
+  path,
   n.harmonic = 10,
   contour.amplitude = -25,
   dims = c(4, 4),
@@ -12,7 +12,7 @@ unsupervised <- function(
   ...
 ) {
   x <- db2ml(
-    db.path = db.path,
+    path = path,
     n.harmonic = n.harmonic,
     contour.amplitude = contour.amplitude
   )
@@ -31,5 +31,4 @@ unsupervised <- function(
     append = TRUE
   )
   dbDisconnect(connection)
-
 }

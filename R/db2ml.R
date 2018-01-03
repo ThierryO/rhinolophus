@@ -1,5 +1,5 @@
 #' Extract a machine learning dataset from the database
-#' @param db.path the path of the rhinolophus database
+#' @param path the path of the rhinolophus database
 #' @param n.harmonic the number of harmonics to extract
 #' @param contour.amplitude the amplitude of the contour to extract
 #' @export
@@ -8,110 +8,71 @@
 #' @importFrom dplyr %>% select inner_join group_by summarise mutate
 #' @importFrom rlang .data
 #' @importFrom tidyr spread
-db2ml <- function(db.path, n.harmonic = 20, contour.amplitude = -25) {
+db2ml <- function(path, n.harmonic = 30, contour.amplitude = -25) {
   assert_that(is.count(n.harmonic))
   assert_that(is.number(contour.amplitude))
 
-  connection <- connect_db(db.path)
+  connection <- connect_db(path)
 
-  relevant <- sprintf("cte_relevant AS (
+  ellipse <- outer(
+    c("sin_time", "cos_time", "sin_frequency", "cos_frequency"),
+    seq_len(n.harmonic),
+    function(...){sprintf(fmt = "h%2$02i_%1$s", ...)}
+  ) %>%
+    as.vector()
+
+  l1 <- sprintf("
+    cte_L1 AS (
+      SELECT
+        contour,
+        %s AS L1
+      FROM
+        parameter AS pa
+    )",
+    paste(sprintf("abs(ifnull(%s, 0))", ellipse), collapse = "+")
+  )
+
+  max.L1 <- sprintf("WITH %s SELECT max(L1) AS maxL1 FROM cte_l1", l1) %>%
+    dbGetQuery(conn = connection) %>%
+    pull("maxL1")
+
+  z <- sprintf("
+    WITH %s
+
     SELECT
-      contour.id,
-      pulse,
-      peak_y / 100 AS peak_frequency,
-      peak_amplitude / 100 AS peak_amplitude
+      c.pulse AS pulse,
+      p.peak_y / 100 AS peak_frequency,
+      p.peak_amplitude / 100 AS peak_amplitude,
+      pa.d_time / 10 AS d_time,
+      pa.d_frequency / 100 AS d_frequency,
+      l1.L1 / %f AS L1,
+      %s
     FROM
-      contour
+      contour AS c
     INNER JOIN
-      pulse
+      pulse AS p
     ON
-      contour.pulse = pulse.id
+      c.pulse = p.id
+    INNER JOIN
+      parameter AS pa
+    ON
+      c.id = pa.contour
+    INNER JOIN
+      cte_l1 AS l1
+    ON
+      c.id = l1.contour
     WHERE
-      contour_amplitude = %i)",
+      contour_amplitude = %i",
+    l1,
+    max.L1,
+    paste(
+      sprintf("ifnull(%1$s, 0)*2/l1.L1 AS %1$s", ellipse),
+      collapse = ",\n"
+    ),
     contour.amplitude
-  )
-
-  params <- sprintf("cte_param AS (
-    SELECT
-      contour, harmonic, description AS parameter_type, value
-    FROM
-      parameter
-    INNER JOIN
-      parameter_type
-    ON
-      parameter.parameter_type = parameter_type.id
-    WHERE
-      harmonic > 0 AND
-      harmonic <= %i)",
-    n.harmonic
-  )
-
-  fourier <- sprintf("WITH %s, %s
-    SELECT
-      contour,
-      'h' || substr('00' || harmonic, -2, 2) || parameter_type AS harmonic,
-      value
-    FROM
-      cte_relevant
-    INNER JOIN
-      cte_param
-    ON
-      cte_relevant.id = cte_param.contour",
-    relevant,
-    params
   ) %>%
     dbGetQuery(conn = connection)
-  fourier <- fourier %>%
-    group_by(.data$contour) %>%
-    summarise(L1 = sum(abs(.data$value))) %>%
-    inner_join(fourier, by = "contour") %>%
-    mutate(value = .data$value * 2 / .data$L1) %>%
-    spread("harmonic", "value", fill = 0)
-  max.L1 <- max(fourier$L1)
-  fourier$L1 <- fourier$L1 / max.L1
 
-  params <- "cte_param AS (
-    SELECT
-      contour, harmonic, description AS parameter_type, value
-    FROM
-      parameter
-    INNER JOIN
-      parameter_type
-    ON
-      parameter.parameter_type = parameter_type.id
-    WHERE
-      harmonic = 0)"
-
-  center <- sprintf("WITH %s, %s
-    SELECT
-      contour, parameter_type, value
-    FROM
-      cte_relevant
-    INNER JOIN
-      cte_param
-    ON
-      cte_relevant.id = cte_param.contour",
-    relevant,
-    params
-  ) %>%
-    dbGetQuery(conn = connection) %>%
-    spread("parameter_type", "value", fill = 0) %>%
-    mutate(
-      d_frequency = .data$d_frequency / 100,
-      d_time = .data$d_time / 10
-    )
-
-  z <- sprintf("WITH %s
-    SELECT
-      id, pulse, peak_frequency, peak_amplitude
-    FROM
-      cte_relevant",
-    relevant
-  ) %>%
-    dbGetQuery(conn = connection) %>%
-    inner_join(center, by = c("id" = "contour")) %>%
-    inner_join(fourier, by = c("id" = "contour")) %>%
-    select(-.data$id)
   attr(z, "maxL1") <- max.L1
   attr(z, "peak_frequency") <- 100
   attr(z, "peak_amplitude") <- 100

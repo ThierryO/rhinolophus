@@ -4,10 +4,10 @@
 \alias{db2ml}
 \title{Extract a machine learning dataset from the database}
 \usage{
-db2ml(db.path, n.harmonic = 20, contour.amplitude = -25)
+db2ml(path, n.harmonic = 30, contour.amplitude = -25)
 }
 \arguments{
-\item{db.path}{the path of the rhinolophus database}
+\item{path}{the path of the rhinolophus database}
 
 \item{n.harmonic}{the number of harmonics to extract}
 
