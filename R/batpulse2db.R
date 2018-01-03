@@ -164,37 +164,23 @@ batpulse2db <- function(x, connection){
     ) %>%
     dbWriteTable(conn = connection, name = "contour", append = TRUE)
 
-  repeat {
-    type_id <- x@Parameter %>%
-      distinct_(~Type) %>%
-      left_join(
-        tbl(src, "parameter_type"),
-        by = c("Type" = "description"),
-        copy = TRUE
-      )
-    if (any(is.na(type_id$id))) {
-      max_id <- tbl(src, "parameter_type") %>%
-        summarise_(id = ~max(id)) %>%
-        collect()
-      type_id %>%
-        filter_(~is.na(id)) %>%
-        transmute_(
-          id = ~seq_along(id) + pmin(max_id$id, 0, na.rm = TRUE),
-          description = ~Type
-        ) %>%
-        dbWriteTable(conn = connection, name = "parameter_type", append = TRUE)
-    } else {
-      break
-    }
+  if (all(checked_id$exists)) {
+    return(invisible(NULL))
   }
-  values <- x@Parameter %>%
-    inner_join(type_id, by = "Type") %>%
-    select_(
-      contour = ~ID,
-      harmonic = ~Harmonic,
-      parameter_type = ~id,
-      value = ~Value
-    )
+  values <- checked_id %>%
+    filter_(~!exists) %>%
+    select_(~id) %>%
+    inner_join(x@Parameter, by = c("id" = "ID")) %>%
+    transmute(
+      contour = .data$id,
+      Type = ifelse(
+        .data$Harmonic == 0,
+        .data$Type,
+        sprintf("h%02i_%s", .data$Harmonic, .data$Type)
+      ),
+      .data$Value
+    ) %>%
+    spread("Type", "Value")
   hash <- paste0("tmp", sha1(values))
   dbWriteTable(connection, hash, values, temporary = TRUE, overwrite = TRUE)
   res <- dbSendQuery(
@@ -202,23 +188,25 @@ batpulse2db <- function(x, connection){
     CREATE UNIQUE INDEX IF NOT EXISTS
       idx_%1$s
     ON
-      %1$s (contour, harmonic, parameter_type)
+      %1$s (contour)
   ", hash))
   dbClearResult(res)
   junk <- tbl(src, hash) %>%
     anti_join(
       tbl(src, "parameter"),
-      by = c("contour", "harmonic", "parameter_type")
+      by = "contour"
     ) %>%
     compute(paste0(hash, "2"), temporary = TRUE, overwrite = TRUE)
+
   res <- dbSendQuery(
     connection,
     sprintf("
       INSERT INTO
-        parameter (contour, harmonic, parameter_type, value)
+        parameter (%1$s)
       SELECT
-        contour, harmonic, parameter_type, value
-      FROM %s2",
+        %1$s
+      FROM %2$s2",
+      paste(colnames(values), collapse = ", "),
       hash
     )
   )
