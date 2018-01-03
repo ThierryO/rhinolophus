@@ -33,6 +33,7 @@ connect_db <- function(path){
     CREATE INDEX IF NOT EXISTS idx_recording_timestamp ON recording (timestamp)
   ")
   dbClearResult(res)
+
   res <- dbSendQuery(
     connection, "
     CREATE TABLE IF NOT EXISTS spectrogram (
@@ -54,6 +55,7 @@ connect_db <- function(path){
       spectrogram (fingerprint)
   ")
   dbClearResult(res)
+
   res <- dbSendQuery(
     connection, "
     CREATE TABLE IF NOT EXISTS pulse (
@@ -75,6 +77,7 @@ connect_db <- function(path){
       pulse (fingerprint)
   ")
   dbClearResult(res)
+
   res <- dbSendQuery(
     connection, "
     CREATE TABLE IF NOT EXISTS contour (
@@ -96,41 +99,27 @@ connect_db <- function(path){
       contour (fingerprint)
   ")
   dbClearResult(res)
+
+  ellipse <- outer(
+    1:30,
+    c("sin_time", "cos_time", "sin_frequency", "cos_frequency"),
+    function(...){sprintf(fmt = "h%02i_%s", ...)}
+  ) %>%
+    as.vector() %>%
+    paste(collapse = " REAL,\n")
   res <- dbSendQuery(
-    connection, "
-    CREATE TABLE IF NOT EXISTS parameter_type (
-      id INTEGER PRIMARY KEY,
-      description TEXT NOT NULL
+    connection,
+    sprintf("
+      CREATE TABLE IF NOT EXISTS parameter (
+        contour INTEGER PRIMARY KEY,
+        d_time REAL NOT NULL,
+        d_frequency REAL NOT NULL,
+        %s,
+        FOREIGN KEY (contour) REFERENCES contour (id)
+      )",
+      ellipse
     )
-  ")
-  dbClearResult(res)
-  res <- dbSendQuery(
-    connection, "
-    CREATE UNIQUE INDEX IF NOT EXISTS
-      idx_parameter_type_description
-    ON
-      parameter_type (description)
-  ")
-  dbClearResult(res)
-  res <- dbSendQuery(
-    connection, "
-    CREATE TABLE IF NOT EXISTS parameter (
-      contour INTEGER NOT NULL,
-      harmonic INTEGER NOT NULL,
-      parameter_type integer NOT NULL,
-      value REAL NOT NULL,
-      FOREIGN KEY (contour) REFERENCES contour (id),
-      FOREIGN KEY (parameter_type) REFERENCES parameter_type (id)
-    )
-  ")
-  dbClearResult(res)
-  res <- dbSendQuery(
-    connection, "
-    CREATE UNIQUE INDEX IF NOT EXISTS
-      idx_parameter_contour_harmonic_type
-    ON
-      parameter (contour, harmonic, parameter_type)
-  ")
+  )
   dbClearResult(res)
 
   res <- dbSendQuery(
