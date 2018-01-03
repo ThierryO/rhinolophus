@@ -220,7 +220,6 @@ connect_db <- function(path){
       species INTEGER NOT NULL,
       activity INTEGER NOT NULL,
       animal INTEGER,
-      contour_amplitude INTEGER,
       FOREIGN KEY (contour) REFERENCES contour (id),
       FOREIGN KEY (species) REFERENCES species (id),
       FOREIGN KEY (activity) REFERENCES activity (id)

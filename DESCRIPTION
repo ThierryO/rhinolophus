@@ -57,5 +57,6 @@ Collate:
     'read_wav.R'
     'reconstruct.R'
     'unscale.R'
+    'unsupervised.R'
     'wav2rds.R'
     'wav2spectrogram.R'
