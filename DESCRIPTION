@@ -51,6 +51,7 @@ Collate:
     'extract_pulse.R'
     'get_contours.R'
     'get_species.R'
+    'label_unsupervised.R'
     'next_power_2.R'
     'pulse_parameter.R'
     'rds2db.R'
