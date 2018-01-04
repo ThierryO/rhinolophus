@@ -20,6 +20,7 @@ Imports:
     rgeos,
     RSQLite,
     signal,
+    tibble,
     tidyr,
     tuneR
 Depends:
@@ -47,6 +48,7 @@ Collate:
     'connect_db.R'
     'correct_timestamp.R'
     'db2ml.R'
+    'db2sp.R'
     'elliptic_fourier.R'
     'extract_pulse.R'
     'get_contours.R'
