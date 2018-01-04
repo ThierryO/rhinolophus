@@ -171,14 +171,14 @@ batpulse2db <- function(x, connection){
     filter_(~!exists) %>%
     select_(~id) %>%
     inner_join(x@Parameter, by = c("id" = "ID")) %>%
-    transmute(
+    transmute_(
       contour = .data$id,
-      Type = ifelse(
-        .data$Harmonic == 0,
-        .data$Type,
-        sprintf("h%02i_%s", .data$Harmonic, .data$Type)
+      Type = ~ifelse(
+        Harmonic == 0,
+        Type,
+        sprintf("h%02i_%s", Harmonic, Type)
       ),
-      .data$Value
+      ~Value
     ) %>%
     spread("Type", "Value")
   hash <- paste0("tmp", sha1(values))
