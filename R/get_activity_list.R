@@ -6,8 +6,17 @@ get_activity_list <- function(connection) {
   dbGetQuery(
     conn = connection, "
     SELECT
-      id, description
+      a.id, a.description, COUNT(m.contour) AS times_used
     FROM
-      activity"
+      activity AS a
+    LEFT JOIN
+      manual AS m
+    ON
+      a.id = m.activity
+    GROUP BY
+      a.id, a.description
+    ORDER BY
+      times_used DESC, description
+    "
   )
 }
