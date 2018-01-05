@@ -51,6 +51,7 @@ Collate:
     'db2sp.R'
     'elliptic_fourier.R'
     'extract_pulse.R'
+    'get_activity_list.R'
     'get_contours.R'
     'get_species.R'
     'get_species_list.R'
