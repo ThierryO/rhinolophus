@@ -207,7 +207,7 @@ connect_db <- function(path){
     CREATE TABLE IF NOT EXISTS manual (
       contour INTEGER PRIMARY KEY,
       species INTEGER NOT NULL,
-      activity INTEGER NOT NULL,
+      activity INTEGER,
       animal INTEGER,
       FOREIGN KEY (contour) REFERENCES contour (id),
       FOREIGN KEY (species) REFERENCES species (id),
