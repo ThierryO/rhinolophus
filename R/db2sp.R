@@ -22,23 +22,28 @@ db2sp <- function(connection, recording) {
       p.peak_x + pa.d_time AS d_time,
       pa.d_frequency,
       %s,
+      u.class,
       m.species,
       m.activity,
       m.animal
     FROM
-            spectrogram AS s
+              spectrogram AS s
+            INNER JOIN
+              pulse AS p
+            ON
+              s.id = p.spectrogram
           INNER JOIN
-            pulse AS p
+            contour AS c
           ON
-            s.id = p.spectrogram
+            p.id = c.pulse
         INNER JOIN
-          contour AS c
+          parameter AS pa
         ON
-          p.id = c.pulse
+          c.id = pa.contour
       INNER JOIN
-        parameter AS pa
+        unsupervised AS u
       ON
-        c.id = pa.contour
+        p.id = u.pulse
     LEFT JOIN
       manual AS m
     ON
@@ -64,9 +69,12 @@ db2sp <- function(connection, recording) {
       params %>%
         select(
           "contour", "peak_time", "peak_frequency", "species", "activity",
-          "animal"
+          "animal", "class"
         ) %>%
-        mutate(rowname = .data$contour) %>%
+        mutate(
+          rowname = .data$contour,
+          class = as.integer(factor(class))
+        ) %>%
         column_to_rownames()
     )
 }
