@@ -61,6 +61,7 @@ Collate:
     'rds2db.R'
     'read_wav.R'
     'reconstruct.R'
+    'status_unsupervised.R'
     'store_manual.R'
     'unscale.R'
     'unsupervised.R'
