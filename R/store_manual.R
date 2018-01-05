@@ -8,7 +8,7 @@
 #' @importFrom RSQLite dbWriteTable dbSendQuery dbClearResult dbRemoveTable
 store_manual <- function(connection, manual) {
   update <- manual %>%
-    filter(!is.na(.data$species), !is.na(.data$activity)) %>%
+    filter(!is.na(.data$species)) %>%
     select("contour", "species", "activity", "animal")
   if (nrow(update) == 0) {
     return(NULL)
