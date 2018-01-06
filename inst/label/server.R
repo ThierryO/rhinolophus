@@ -5,7 +5,8 @@ library(dplyr)
 shinyServer(function(input, output, session) {
   data <- reactiveValues(
     connection = character(0),
-    contour = integer(0),
+    contours = NULL,
+    current = integer(0),
     specieslist = data.frame(
       id = integer(0),
       parent = integer(0),
@@ -34,18 +35,6 @@ shinyServer(function(input, output, session) {
       }
       data$connection <- parseDirPath(roots, input$path) %>%
         connect_db()
-      data$specieslist <- get_species_list(data$connection)
-      output$species_list <- renderTable(data$specieslist)
-      updateSelectInput(
-        session,
-        "contour_species",
-        choices = c(choose = "", data$specieslist$abbreviation)
-      )
-      updateSelectInput(
-        session,
-        "contour_activity",
-        choices = c(choose = "", data$activitylist$description)
-      )
     }
   )
 
@@ -71,6 +60,34 @@ shinyServer(function(input, output, session) {
     if (length(data$connection) == 0) {
       return(NULL)
     }
+    input$other
+    data$specieslist <- get_species_list(data$connection)
+    output$species_list <- renderTable(data$specieslist)
+    tmp <- data$specieslist$id
+    names(tmp) <- data$specieslist$abbreviation
+    tmp <- tmp[
+      order(-data$specieslist$times_used, data$specieslist$abbreviation)
+    ]
+    updateSelectInput(
+      session,
+      "contour_species",
+      choices = c(choose = "", tmp)
+    )
+    data$activitylist <- get_activity_list(data$connection)
+    output$activity_list <- renderTable(data$activitylist)
+    tmp <- data$activitylist$id
+    names(tmp) <- data$activitylist$description
+    tmp <- tmp[
+      order(-data$activitylist$times_used, data$activitylist$description)
+    ]
+    updateSelectInput(
+      session,
+      "contour_activity",
+      choices = c(choose = "", tmp)
+    )
+    output$status_unsupervised <- renderTable(
+      status_unsupervised(data$connection)
+    )
     check <- label_unsupervised(data$connection)
     if (file_test("-f", check$filename)) {
       return(
@@ -109,7 +126,11 @@ shinyServer(function(input, output, session) {
     updateSliderInput(
       session,
       "starttime",
-      value = 0,
+      value = pmax(
+        data$contours$peak_time[data$contours$contour == data$current] -
+          input$timeinterval / 2,
+        0
+      ),
       max = input$timeinterval * (max(sonogram@SpecGram$t) %/% input$timeinterval),
       step = input$timeinterval
     )
@@ -138,15 +159,20 @@ shinyServer(function(input, output, session) {
     )
   })
 
-  contours <- reactive({
-    if (is.null(filename())) {
-      return(NULL)
+  observeEvent(
+    filename(),
+    {
+      if (is.null(filename())) {
+        return(NULL)
+      }
+      data$contours <- db2sp(connection = data$connection, recording = filename()$id)
+      data$current <- data$contours@data %>%
+        filter(is.na(species)) %>%
+        arrange(peak_time) %>%
+        slice(1) %>%
+        pull(contour)
     }
-    cont <- db2sp(connection = data$connection, recording = filename()$id)
-    data$contour <- cont$contour[order(cont$peak_time)[1]]
-    cont
-  })
-
+  )
 
   output$sonogram <- renderPlot({
     if (is.null(sonor())) {
@@ -158,6 +184,7 @@ shinyServer(function(input, output, session) {
       asp = input$aspect,
       breaks = breaks,
       col = topo.colors(length(breaks)),
+      main = filename()$wav,
       xlim = input$starttime + c(0, input$timeinterval),
       ylim = input$frequency,
       xlab = "time (ms)",
@@ -170,30 +197,112 @@ shinyServer(function(input, output, session) {
       lwd = 2
     )
     abline(h = c(18, 21, 27, 35), lty = 3, col = "white", lwd = 2)
-    plot(contours(), lwd = 2, border = contours()$class, add = TRUE)
+    if (any(!is.na(data$contours$animal))) {
+      plot(
+        data$contours[!is.na(data$contours$animal), ],
+        col = data$contours$animal[!is.na(data$contours$animal)] + 1,
+        add = TRUE
+      )
+    }
+    if (any(is.na(data$contours$animal))) {
+      plot(
+        data$contours[is.na(data$contours$species), ],
+        add = TRUE
+      )
+    }
     points(
-      contours()$peak_time,
-      contours()$peak_frequency,
-      col = contours()$class,
+      data$contours$peak_time,
+      data$contours$peak_frequency,
       pch = 13,
       cex = 2
     )
+    if (length(data$current)) {
+      plot(
+        data$contours[data$contours$contour == data$current, ],
+        lwd = 6,
+        border = "red",
+        add = TRUE
+      )
+    }
   })
 
   observeEvent(
     input$plot_click,
     {
-      data$contour <- contours()$contour[
+      data$current <- data$contours$contour[
         which.min(
-          (contours()$peak_time - input$plot_click$x) ^ 2 +
-          (contours()$peak_frequency - input$plot_click$y) ^ 2
+          (data$contours$peak_time - input$plot_click$x) ^ 2 +
+          (data$contours$peak_frequency - input$plot_click$y) ^ 2
         )
       ]
-      # updateSliderInput(
-      #   session,
-      #   "starttime",
-      #   value = pmax(input$plot_click$x - input$timeinterval / 2, 0)
-      # )
+      updateSelectInput(
+        session,
+        "contour_species",
+        selected = ifelse(
+          is.na(data$contours$species[data$contours$contour == data$current]),
+          "",
+          as.character(
+            data$contours$species[data$contours$contour == data$current]
+          )
+        )
+      )
+      updateSelectInput(
+        session,
+        "contour_activity",
+        selected = ifelse(
+          is.na(data$contours$activity[data$contours$contour == data$current]),
+          "",
+          as.character(
+            data$contours$activity[data$contours$contour == data$current]
+          )
+        )
+      )
+      updateNumericInput(
+        session,
+        "contour_animal",
+        value = data$contours$animal[data$contours$contour == data$current]
+      )
+      updateSliderInput(
+        session,
+        "starttime",
+        value = pmax(
+          data$contours$peak_time[data$contours$contour == data$current] -
+            input$timeinterval / 2,
+          0
+        )
+      )
+    }
+  )
+
+  observeEvent(
+    input$contour_species,
+    {
+      if (input$contour_species == "") {
+        data$contours$species[data$contours$contour == data$current] <- NA
+      } else {
+        data$contours$species[data$contours$contour == data$current] <-
+          as.integer(input$contour_species)
+      }
+    }
+  )
+
+  observeEvent(
+    input$contour_activity,
+    {
+      if (input$contour_activity == "") {
+        data$contours$activity[data$contours$contour == data$current] <- NA
+      } else {
+        data$contours$activity[data$contours$contour == data$current] <-
+          as.integer(input$contour_activity)
+      }
+    }
+  )
+
+  observeEvent(
+    input$contour_animal,
+    {
+      data$contours$animal[data$contours$contour == data$current] <-
+        as.integer(input$contour_animal)
     }
   )
 
@@ -224,6 +333,7 @@ shinyServer(function(input, output, session) {
   observeEvent(
     input$new_species_ok,
     {
+      store_manual(data$connection, data$contours@data)
       dbWriteTable(
         data$connection,
         "species",
@@ -249,10 +359,15 @@ shinyServer(function(input, output, session) {
       removeModal()
       data$specieslist <- get_species_list(data$connection)
       output$species_list <- renderTable(data$specieslist)
+      tmp <- data$specieslist$id
+      names(tmp) <- data$specieslist$abbreviation
+      tmp <- tmp[
+        order(-data$specieslist$times_used, data$specieslist$abbreviation)
+      ]
       updateSelectInput(
         session,
         "contour_species",
-        choices = c(choose = "", data$specieslist$abbreviation)
+        choices = c(choose = "", tmp)
       )
     }
   )
@@ -278,6 +393,7 @@ shinyServer(function(input, output, session) {
   observeEvent(
     input$new_activity_ok,
     {
+      store_manual(data$connection, data$contours@data)
       dbWriteTable(
         data$connection,
         "activity",
@@ -295,13 +411,32 @@ shinyServer(function(input, output, session) {
       removeModal()
       data$activitylist <- get_activity_list(data$connection)
       output$activity_list <- renderTable(data$activitylist)
+      tmp <- data$activitylist$id
+      names(tmp) <- data$activitylist$description
+      tmp <- tmp[
+        order(-data$activitylist$times_used, data$activitylist$description)
+      ]
       updateSelectInput(
         session,
         "contour_activity",
-        choices = c(choose = "", data$activititylist$description)
+        choices = c(choose = "", tmp)
       )
     }
   )
+
+  observeEvent(
+    input$save,
+    {
+      if (!inherits(data$connection, "DBIConnection")) {
+        return(NULL)
+      }
+      store_manual(data$connection, data$contours@data)
+      output$status_unsupervised <- renderTable(
+        status_unsupervised(data$connection)
+      )
+    }
+  )
+
 
   reactive(on.exit(dbDisconnect(data$connection)))
 })

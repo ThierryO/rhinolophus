@@ -61,7 +61,9 @@ shinyUI(fluidPage(
         label = "activity",
         choices = c(choose = "")
       ),
-      numericInput("contour_animal", label = "animal", value = NA)
+      numericInput("contour_animal", label = "animal", value = NA),
+      actionButton("save", label = "save labels"),
+      actionButton("other", label = "next recording")
     ),
 
     mainPanel(
@@ -79,6 +81,10 @@ shinyUI(fluidPage(
           "Activity list",
           tableOutput("activity_list"),
           actionButton("new_activity", "New activity")
+        ),
+        tabPanel(
+          "Overview classification",
+          tableOutput("status_unsupervised")
         )
       )
     )
