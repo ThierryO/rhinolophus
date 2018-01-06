@@ -11,6 +11,8 @@ shinyServer(function(input, output, session) {
     channel = "left",
     contours = NULL,
     current = integer(0),
+    sonor = NULL,
+    clamped = NULL,
     specieslist = data.frame(
       id = integer(0),
       parent = integer(0),
@@ -154,54 +156,64 @@ shinyServer(function(input, output, session) {
     }
   )
 
-  sonor <- reactive({
-    if (length(data$wav) == 0) {
-      return(NULL)
+  observeEvent(
+    data$wav,
+    {
+      if (length(data$wav) == 0) {
+        data$sonor <- NULL
+        data$clamped <- NULL
+        return(NULL)
+      }
+      removeTmpFiles(h = 1/60)
+      sonogram <- read_wav(
+        data$wav,
+        channel = data$channel,
+        te.factor = data$t_e_factor
+      ) %>%
+        wav2spectrogram()
+      sonogram@SpecGram$f <- sonogram@SpecGram$f / 1000
+      sonogram@SpecGram$t <- sonogram@SpecGram$t * 1000
+      updateSliderInput(
+        session,
+        "starttime",
+        value = pmax(
+          data$contours$peak_time[data$contours$contour == data$current] -
+            input$timeinterval / 2,
+          0
+        ),
+        max = input$timeinterval * (max(sonogram@SpecGram$t) %/% input$timeinterval),
+        step = input$timeinterval
+      )
+      amplitude_range <- pretty(range(sonogram@SpecGram$S), 10)
+      updateSliderInput(
+        session,
+        "amplitude",
+        value = c(0, max(amplitude_range)),
+        min = min(amplitude_range),
+        max = max(amplitude_range)
+      )
+      frequency_range <- pretty(range(sonogram@SpecGram$f), 10)
+      updateSliderInput(
+        session,
+        "frequency",
+        value = c(0, pmin(140, max(frequency_range))),
+        min = min(frequency_range),
+        max = max(frequency_range)
+      )
+      data$sonor <- raster(
+        sonogram@SpecGram$S[rev(seq_along(sonogram@SpecGram$f)), ],
+        xmn = min(sonogram@SpecGram$t),
+        xmx = max(sonogram@SpecGram$t),
+        ymn = min(sonogram@SpecGram$f),
+        ymx = max(sonogram@SpecGram$f)
+      )
+      data$clamped <- clamp(
+        data$sonor,
+        lower = input$amplitude[1],
+        upper = input$amplitude[2]
+      )
     }
-    removeTmpFiles(h = 1/60)
-    sonogram <- read_wav(
-      data$wav,
-      channel = data$channel,
-      te.factor = data$t_e_factor
-    ) %>%
-      wav2spectrogram()
-    sonogram@SpecGram$f <- sonogram@SpecGram$f / 1000
-    sonogram@SpecGram$t <- sonogram@SpecGram$t * 1000
-    updateSliderInput(
-      session,
-      "starttime",
-      value = pmax(
-        data$contours$peak_time[data$contours$contour == data$current] -
-          input$timeinterval / 2,
-        0
-      ),
-      max = input$timeinterval * (max(sonogram@SpecGram$t) %/% input$timeinterval),
-      step = input$timeinterval
-    )
-    amplitude_range <- pretty(range(sonogram@SpecGram$S), 10)
-    updateSliderInput(
-      session,
-      "amplitude",
-      value = c(0, max(amplitude_range)),
-      min = min(amplitude_range),
-      max = max(amplitude_range)
-    )
-    frequency_range <- pretty(range(sonogram@SpecGram$f), 10)
-    updateSliderInput(
-      session,
-      "frequency",
-      value = c(0, pmin(140, max(frequency_range))),
-      min = min(frequency_range),
-      max = max(frequency_range)
-    )
-    raster(
-      sonogram@SpecGram$S[rev(seq_along(sonogram@SpecGram$f)), ],
-      xmn = min(sonogram@SpecGram$t),
-      xmx = max(sonogram@SpecGram$t),
-      ymn = min(sonogram@SpecGram$f),
-      ymx = max(sonogram@SpecGram$f)
-    )
-  })
+  )
 
   observeEvent(
     data$recording,
@@ -218,13 +230,28 @@ shinyServer(function(input, output, session) {
     }
   )
 
+  observeEvent(
+    input$amplitude,
+    {
+      if (is.null(data$sonor)) {
+        data$clamped <- NULL
+      } else {
+        data$clamped <- clamp(
+          data$sonor,
+          lower = input$amplitude[1],
+          upper = input$amplitude[2]
+        )
+      }
+    }
+  )
+
   output$sonogram <- renderPlot({
-    if (is.null(sonor())) {
+    if (is.null(data$clamped)) {
       return(NULL)
     }
     breaks <- pretty(input$amplitude[1]:input$amplitude[2], 20)
     plot(
-      clamp(sonor(), lower = input$amplitude[1], upper = input$amplitude[2]),
+      data$clamped,
       asp = input$aspect,
       breaks = breaks,
       col = topo.colors(length(breaks)),
