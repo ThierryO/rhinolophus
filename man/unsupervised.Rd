@@ -4,8 +4,8 @@
 \alias{unsupervised}
 \title{Create a new unsupervised classification}
 \usage{
-unsupervised(path, n.harmonic = 10, contour.amplitude = -25, dims = c(4,
-  4), topo = c("rectangular", "hexagonal"), ...)
+unsupervised(path, n.harmonic = 10, contour.amplitude = -25, class = NULL,
+  dims = c(4, 4), topo = c("rectangular", "hexagonal"), ...)
 }
 \arguments{
 \item{path}{the path of the rhinolophus database}
