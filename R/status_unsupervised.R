@@ -31,7 +31,7 @@ status_unsupervised <- function(connection) {
       t.class, t.total, d.done, d.max, d.done - d.max AS alternative, d.species
     FROM cte_total AS t LEFT JOIN cte_done AS d ON t.class = d.class
     ORDER BY
-      t.total >= 160, d.done - d.max >= 10, species DESC, d.done - d.max DESC
+      t.total < 160, d.done - d.max < 10, species DESC, d.done - d.max DESC
   ") %>%
     mutate(split = .data$total > 160 & .data$alternative >= 10)
 
