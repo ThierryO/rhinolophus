@@ -5,6 +5,10 @@ library(dplyr)
 shinyServer(function(input, output, session) {
   data <- reactiveValues(
     connection = character(0),
+    recording = NULL,
+    wav = character(0),
+    t_e_factor = 1,
+    channel = "left",
     contours = NULL,
     current = integer(0),
     specieslist = data.frame(
@@ -56,69 +60,109 @@ shinyServer(function(input, output, session) {
     )
   )
 
-  filename <- reactive({
-    if (length(data$connection) == 0) {
-      return(NULL)
-    }
-    input$other
-    data$specieslist <- get_species_list(data$connection)
-    output$species_list <- renderTable(data$specieslist)
-    tmp <- data$specieslist$id
-    names(tmp) <- data$specieslist$abbreviation
-    tmp <- tmp[
-      order(-data$specieslist$times_used, data$specieslist$abbreviation)
-    ]
-    updateSelectInput(
-      session,
-      "contour_species",
-      choices = c(choose = "", tmp)
-    )
-    data$activitylist <- get_activity_list(data$connection)
-    output$activity_list <- renderTable(data$activitylist)
-    tmp <- data$activitylist$id
-    names(tmp) <- data$activitylist$description
-    tmp <- tmp[
-      order(-data$activitylist$times_used, data$activitylist$description)
-    ]
-    updateSelectInput(
-      session,
-      "contour_activity",
-      choices = c(choose = "", tmp)
-    )
-    output$status_unsupervised <- renderTable(
-      status_unsupervised(data$connection)
-    )
-    check <- label_unsupervised(data$connection)
-    if (file_test("-f", check$filename)) {
-      return(
-        list(
-          id = check$recording,
-          wav = check$filename,
-          t_e_factor = check$t_e_factor,
-          channel = ifelse(check$left_channel == 1, "left", "right")
-        )
+  observeEvent(
+    data$connection,
+    {
+      if (length(data$connection) == 0) {
+        return(NULL)
+      }
+      data$specieslist <- get_species_list(data$connection)
+      output$species_list <- renderTable(data$specieslist)
+      tmp <- data$specieslist$id
+      names(tmp) <- data$specieslist$abbreviation
+      tmp <- tmp[
+        order(-data$specieslist$times_used, data$specieslist$abbreviation)
+      ]
+      updateSelectInput(
+        session,
+        "contour_species",
+        choices = c(choose = "", tmp)
       )
-    } else {
-      return(
-        list(
-          id = check$recording,
-          wav = character(0),
-          t_e_factor = 1,
-          channel = "left"
-        )
+      data$activitylist <- get_activity_list(data$connection)
+      output$activity_list <- renderTable(data$activitylist)
+      tmp <- data$activitylist$id
+      names(tmp) <- data$activitylist$description
+      tmp <- tmp[
+        order(-data$activitylist$times_used, data$activitylist$description)
+      ]
+      updateSelectInput(
+        session,
+        "contour_activity",
+        choices = c(choose = "", tmp)
       )
+      output$status_unsupervised <- renderTable(
+        status_unsupervised(data$connection)
+      )
+      check <- label_unsupervised(data$connection)
+      data$recording = check$recording
+      if (file_test("-f", check$filename)) {
+        data$wav <- check$filename
+        data$t_e_factor <- check$t_e_factor
+        data$channel <- ifelse(check$left_channel == 1, "left", "right")
+      } else {
+        data$wav <- character(0)
+        data$t_e_factor <- 1
+        data$channel <- "left"
+      }
     }
-  })
+  )
+
+  observeEvent(
+    input$other,
+    {
+      if (length(data$connection) == 0) {
+        return(NULL)
+      }
+      data$specieslist <- get_species_list(data$connection)
+      output$species_list <- renderTable(data$specieslist)
+      tmp <- data$specieslist$id
+      names(tmp) <- data$specieslist$abbreviation
+      tmp <- tmp[
+        order(-data$specieslist$times_used, data$specieslist$abbreviation)
+      ]
+      updateSelectInput(
+        session,
+        "contour_species",
+        choices = c(choose = "", tmp)
+      )
+      data$activitylist <- get_activity_list(data$connection)
+      output$activity_list <- renderTable(data$activitylist)
+      tmp <- data$activitylist$id
+      names(tmp) <- data$activitylist$description
+      tmp <- tmp[
+        order(-data$activitylist$times_used, data$activitylist$description)
+      ]
+      updateSelectInput(
+        session,
+        "contour_activity",
+        choices = c(choose = "", tmp)
+      )
+      output$status_unsupervised <- renderTable(
+        status_unsupervised(data$connection)
+      )
+      check <- label_unsupervised(data$connection)
+      data$recording = check$recording
+      if (file_test("-f", check$filename)) {
+        data$wav <- check$filename
+        data$t_e_factor <- check$t_e_factor
+        data$channel <- ifelse(check$left_channel == 1, "left", "right")
+      } else {
+        data$wav <- character(0)
+        data$t_e_factor <- 1
+        data$channel <- "left"
+      }
+    }
+  )
 
   sonor <- reactive({
-    if (length(filename()$wav) == 0) {
+    if (length(data$wav) == 0) {
       return(NULL)
     }
     removeTmpFiles(h = 1/60)
     sonogram <- read_wav(
-      filename()$wav,
-      channel = filename()$channel,
-      te.factor = filename()$t_e_factor
+      data$wav,
+      channel = data$channel,
+      te.factor = data$t_e_factor
     ) %>%
       wav2spectrogram()
     sonogram@SpecGram$f <- sonogram@SpecGram$f / 1000
@@ -160,12 +204,12 @@ shinyServer(function(input, output, session) {
   })
 
   observeEvent(
-    filename(),
+    data$recording,
     {
-      if (is.null(filename())) {
+      if (is.null(data$recording)) {
         return(NULL)
       }
-      data$contours <- db2sp(connection = data$connection, recording = filename()$id)
+      data$contours <- db2sp(connection = data$connection, recording = data$recording)
       data$current <- data$contours@data %>%
         filter(is.na(species)) %>%
         arrange(peak_time) %>%
@@ -184,7 +228,7 @@ shinyServer(function(input, output, session) {
       asp = input$aspect,
       breaks = breaks,
       col = topo.colors(length(breaks)),
-      main = filename()$wav,
+      main = data$wav,
       xlim = input$starttime + c(0, input$timeinterval),
       ylim = input$frequency,
       xlab = "time (ms)",
