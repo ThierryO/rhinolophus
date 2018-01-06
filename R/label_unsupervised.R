@@ -43,7 +43,7 @@ label_unsupervised <- function(connection) {
     cte_weight AS (
       SELECT
         u.class,
-        1 / (COUNT(m.species) + 1) AS weight
+        COUNT(m.species) + 1 AS weight
       FROM
           unsupervised AS u
         INNER JOIN
@@ -60,7 +60,7 @@ label_unsupervised <- function(connection) {
     cte_selection AS (
       SELECT
         cc.recording,
-        SUM(cc.n * cw.weight) AS total
+        SUM(1.0 * cc.n / cw.weight) AS total
       FROM
         cte_pulse AS cc
       INNER JOIN
@@ -82,3 +82,5 @@ label_unsupervised <- function(connection) {
       cs.recording = r.id"
   )
 }
+
+
