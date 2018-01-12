@@ -14,9 +14,25 @@ bat_som <- function(
   topo <- match.arg(topo)
   xm <- as.matrix(x[, colnames(x) != "pulse"])
   rownames(xm) <- x[, "pulse", drop = TRUE]
+  pca <- prcomp(xm)
+  split <- function(y, z) {
+    my <- min(y)
+    dy <- diff(range(y)) + 1e-6
+    (seq_len(z) - 0.5) * dy / z + my
+  }
+  center <- expand.grid(
+    split(pca$x[, 1], dims[1]),
+    split(pca$x[, 2], dims[2])
+  )
+  center <- cbind(
+    as.matrix(center),
+    matrix(0, nrow = nrow(center), ncol = ncol(pca$rotation) - 2)
+  )
+  center <- tcrossprod(center, pca$rotation)
   x_som <- som(
     xm,
     grid = somgrid(xdim = dims[1], ydim = dims[2], topo = topo),
+    init = center,
     ...
   )
   attr(x_som$codes[[1]], "maxL1") <- attr(x, "maxL1")
