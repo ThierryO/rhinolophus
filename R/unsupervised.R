@@ -7,7 +7,7 @@ unsupervised <- function(
   path,
   n.harmonic = 10,
   contour.amplitude = -25,
-  class = NULL,
+  class,
   dims = c(4, 4),
   topo = c("rectangular","hexagonal"),
   ...

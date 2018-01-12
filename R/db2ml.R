@@ -12,7 +12,7 @@ db2ml <- function(
   path,
   n.harmonic = 30,
   contour.amplitude = -25,
-  class = NULL
+  class
 ) {
   assert_that(is.count(n.harmonic))
   assert_that(is.number(contour.amplitude))

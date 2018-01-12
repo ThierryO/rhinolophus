@@ -4,7 +4,7 @@
 \alias{db2ml}
 \title{Extract a machine learning dataset from the database}
 \usage{
-db2ml(path, n.harmonic = 30, contour.amplitude = -25, class = NULL)
+db2ml(path, n.harmonic = 30, contour.amplitude = -25, class)
 }
 \arguments{
 \item{path}{the path of the rhinolophus database}
