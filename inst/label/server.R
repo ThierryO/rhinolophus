@@ -284,7 +284,7 @@ shinyServer(function(input, output, session) {
     points(
       data$contours$peak_time,
       data$contours$peak_frequency,
-      pch = 13,
+      pch = ifelse(is.na(data$contours$species), 13, 8),
       cex = 2
     )
     if (length(data$current)) {
