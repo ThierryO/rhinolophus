@@ -14,6 +14,7 @@ Imports:
     dbplyr,
     digest,
     dplyr,
+    keras,
     kohonen,
     methods,
     rlang,
@@ -56,6 +57,7 @@ Collate:
     'get_species.R'
     'get_species_list.R'
     'label_unsupervised.R'
+    'native_dl.R'
     'next_power_2.R'
     'pulse_parameter.R'
     'rds2db.R'
