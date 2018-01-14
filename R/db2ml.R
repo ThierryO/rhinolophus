@@ -2,6 +2,7 @@
 #' @param path the path of the rhinolophus database
 #' @param n.harmonic the number of harmonics to extract
 #' @param contour.amplitude the amplitude of the contour to extract
+#' @param class optional class id
 #' @export
 #' @importFrom assertthat assert_that is.count is.number
 #' @importFrom RSQLite dbConnect SQLite dbDisconnect

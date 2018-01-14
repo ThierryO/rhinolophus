@@ -5,6 +5,7 @@
 #' @param ... arguments past to \code{\link[kohonen]{som}}
 #' @export
 #' @importFrom kohonen som somgrid
+#' @importFrom stats prcomp
 bat_som <- function(
   x,
   dims = rep(floor(log(nrow(x))), 2),

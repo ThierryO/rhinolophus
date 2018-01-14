@@ -12,6 +12,8 @@ db2ml(path, n.harmonic = 30, contour.amplitude = -25, class)
 \item{n.harmonic}{the number of harmonics to extract}
 
 \item{contour.amplitude}{the amplitude of the contour to extract}
+
+\item{class}{optional class id}
 }
 \description{
 Extract a machine learning dataset from the database

@@ -14,6 +14,8 @@ unsupervised(path, n.harmonic = 10, contour.amplitude = -25, class,
 
 \item{contour.amplitude}{the amplitude of the contour to extract}
 
+\item{class}{optional class id}
+
 \item{dims}{dimensions of the grid}
 
 \item{topo}{rectangular or hexagonal topology}
