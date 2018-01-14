@@ -4,12 +4,14 @@
 \alias{db2sp}
 \title{convert the contours of a given recording in the database into a SpatialPolygonsDataFrame}
 \usage{
-db2sp(connection, recording)
+db2sp(connection, recording, dl = FALSE)
 }
 \arguments{
 \item{connection}{the connection to the database}
 
 \item{recording}{the id of the recording}
+
+\item{dl}{get the naive deep learning classification}
 }
 \description{
 convert the contours of a given recording in the database into a SpatialPolygonsDataFrame

@@ -1,12 +1,13 @@
 #' convert the contours of a given recording in the database into a SpatialPolygonsDataFrame
 #' @param connection the connection to the database
 #' @param recording the id of the recording
+#' @param dl get the naive deep learning classification
 #' @export
 #' @importFrom RSQLite dbGetQuery
-#' @importFrom dplyr %>% group_by do pull select mutate
+#' @importFrom dplyr %>% group_by do pull select mutate arrange desc summarise left_join
 #' @importFrom sp Polygon Polygons SpatialPolygons SpatialPolygonsDataFrame
 #' @importFrom tibble column_to_rownames
-db2sp <- function(connection, recording) {
+db2sp <- function(connection, recording, dl = FALSE) {
   ellipse <- outer(
     c("sin_time", "cos_time", "sin_frequency", "cos_frequency"),
     1:30,
@@ -55,6 +56,34 @@ db2sp <- function(connection, recording) {
     recording
   ) %>%
     dbGetQuery(conn = connection)
+  if (dl) {
+    params <- sprintf(
+      "SELECT c.id AS contour, pr.class, pr.probability
+      FROM
+          spectrogram AS s INNER JOIN pulse AS p ON s.id = p.spectrogram
+        INNER JOIN
+          contour AS c ON p.id = c.pulse
+      INNER JOIN
+        prediction AS pr ON p.id = pr.pulse
+      WHERE s.recording = %i",
+      recording
+    ) %>%
+      dbGetQuery(conn = connection) %>%
+      group_by(.data$contour) %>%
+      arrange(desc(.data$probability)) %>%
+      summarise(
+        class = sprintf("%s (%.0f%%)", .data$class, 100 * .data$probability) %>%
+          paste(collapse = ", "),
+        score = min(.data$probability)
+      ) %>%
+      left_join(x = select(params, -.data$class), by = "contour")
+  } else {
+    params <- params %>%
+      mutate(
+        class = as.integer(factor(.data$class)),
+        score = NA
+      )
+  }
   reconstruct(params) %>%
     group_by(.data$pulse) %>%
     do(
@@ -69,11 +98,10 @@ db2sp <- function(connection, recording) {
       params %>%
         select(
           "contour", "peak_time", "peak_frequency", "species", "activity",
-          "animal", "class"
+          "animal", "class", "score"
         ) %>%
         mutate(
-          rowname = .data$contour,
-          class = as.integer(factor(class))
+          rowname = .data$contour
         ) %>%
         column_to_rownames()
     )
