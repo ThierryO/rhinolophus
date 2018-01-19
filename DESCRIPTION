@@ -17,13 +17,15 @@ Imports:
     keras,
     kohonen,
     methods,
+    png,
     rlang,
     rgeos,
     RSQLite,
     signal,
     tibble,
     tidyr,
-    tuneR
+    tuneR,
+    zoo
 Depends:
     raster,
     sp
@@ -64,6 +66,7 @@ Collate:
     'rds2db.R'
     'read_wav.R'
     'reconstruct.R'
+    'sound_png.R'
     'status_unsupervised.R'
     'store_manual.R'
     'unscale.R'
