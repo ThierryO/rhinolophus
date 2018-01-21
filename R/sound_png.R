@@ -17,6 +17,15 @@ sound_png <- function(sp, min.amp = 30, soundbite = 10e-3, verbose = TRUE) {
   if (verbose) {
     message(sp@Recording$Filename)
   }
+  metafile <- sprintf(
+    "%s/%s.rds",
+    dirname(sp@Recording$Filename),
+    sp@Spectrogram$Fingerprint
+  )
+  if (file.exists(metafile)) {
+    return(invisible(NULL))
+  }
+
   relevant <- sum(sp@SpecGram$f < 10e3):(sum(sp@SpecGram$f <= 120e3) + 1)
   sp@SpecGram$S <- sp@SpecGram$S[relevant, ]
   sp@SpecGram$f <- sp@SpecGram$f[relevant]
@@ -68,5 +77,14 @@ sound_png <- function(sp, min.amp = 30, soundbite = 10e-3, verbose = TRUE) {
     max_amp[done] <- 0
     location <- which.max(max_amp)
   }
+
+  saveRDS(
+    new(
+      "batSpectrogramMeta",
+      Spectrogram = sp@Spectrogram,
+      Recording = sp@Recording
+    ),
+    file = metafile
+  )
   return(invisible(NULL))
 }
