@@ -3,6 +3,7 @@
 export(bat_som)
 export(bat_wav)
 export(batpulse2db)
+export(check_fingerprint)
 export(connect_db)
 export(correct_timestamp)
 export(db2ml)

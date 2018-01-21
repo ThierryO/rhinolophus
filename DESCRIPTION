@@ -48,6 +48,7 @@ Collate:
     'bat_som.R'
     'bat_wav.R'
     'batpulse2db.R'
+    'check_fingerprint.R'
     'connect_db.R'
     'correct_timestamp.R'
     'db2ml.R'
