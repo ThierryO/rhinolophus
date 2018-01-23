@@ -32,10 +32,10 @@ batpulse2db <- function(x, connection){
       .data$id,
       fingerprint = .data$Fingerprint,
       filename = .data$Filename,
-      timestamp = .data$as.numeric(Timestamp),
-      sample_rate = .data$as.integer(SampleRate),
-      t_e_factor = .data$as.integer(TEFactor),
-      left_channel = .data$as.integer(LeftChannel)
+      timestamp = as.numeric(.data$Timestamp),
+      sample_rate = as.integer(.data$SampleRate),
+      t_e_factor = as.integer(.data$TEFactor),
+      left_channel = as.integer(.data$LeftChannel)
     ) %>%
     dbWriteTable(conn = connection, name = "recording", append = TRUE)
 
