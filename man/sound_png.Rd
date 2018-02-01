@@ -4,7 +4,7 @@
 \alias{sound_png}
 \title{Store sounds from the spectrogram as png}
 \usage{
-sound_png(sp, min.amp = 30, soundbite = 0.01, verbose = TRUE)
+sound_png(sp, min.amp = 30, soundbite = 0.01, path, verbose = TRUE)
 }
 \arguments{
 \item{sp}{a batSpectgram object}
@@ -12,6 +12,10 @@ sound_png(sp, min.amp = 30, soundbite = 0.01, verbose = TRUE)
 \item{min.amp}{the minimal amplitude of the strongest part of the sound in dB}
 
 \item{soundbite}{the maximal length of the sound in seconds}
+
+\item{path}{the path to store the png and metadata files}
+
+\item{verbose}{display the name of the current wav file}
 }
 \description{
 Store sounds from the spectrogram as png
